@@ -23,4 +23,6 @@
     
     <color name="row_selected">#3333b5e5</color>
     
+    <color name="details_divider">#ffDEDEDE</color>
+    
 </resources>

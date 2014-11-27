@@ -187,14 +187,21 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     }
     
     @Override
-    public void viewStockDetails(String symbol, long id)
+    public void viewStockDetails(Quote quote, long id)
     {
         if(Logger.isDebugEnabled())
         {
             Logger.debug("%s.%s: Details", CLASS_NAME, "viewStockDetails");
         }
         
-        replaceFragment(new DetailsStockFragment(), DetailsStockFragment.TAG);
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(DetailsStockFragment.KEY_QUOTE, quote);
+        bundle.putLong(DetailsStockFragment.KEY_ID, id);
+        DetailsStockFragment fragment = new DetailsStockFragment();
+        fragment.setArguments(bundle);
+        replaceFragment(fragment, DetailsStockFragment.TAG);
+        
+        //replaceFragment(new DetailsStockFragment(quote, id), DetailsStockFragment.TAG);
     }
     
     private void replaceFragment(android.app.Fragment fragment, String tag)

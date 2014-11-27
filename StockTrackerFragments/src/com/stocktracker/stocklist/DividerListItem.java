@@ -21,7 +21,7 @@ public class DividerListItem implements StockTrackerListItem
 
         if(divider == null)
         {
-            divider = inflater.inflate(R.layout.divider_line, null);
+            divider = inflater.inflate(R.layout.stock_list_divider_line, null);
         }
         
         return divider;

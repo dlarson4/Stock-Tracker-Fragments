@@ -73,7 +73,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
     {
         void editStock(Quote quote);
         void deleteStock(String symbol, long id);
-        void viewStockDetails(String symbol, long id);
+        void viewStockDetails(Quote quote, long id);
         void addClicked(View view);
     }
     
@@ -398,7 +398,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
                     Logger.debug("%s.%s: Details", CLASS_NAME, "onActionItemClicked");
                 }
                 mActionMode.finish();
-                mCallback.viewStockDetails(quote.getSymbol(), quote.getId());
+                mCallback.viewStockDetails(quote, quote.getId());
                 break;
             }
             case R.id.action_delete:
