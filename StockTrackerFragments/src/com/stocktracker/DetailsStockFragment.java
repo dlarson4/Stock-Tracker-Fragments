@@ -25,6 +25,12 @@ public class DetailsStockFragment extends Fragment
 
     private long id;
     private Quote quote;
+    
+    private float marginLeft;
+    private float marginTop;
+    private float marginRight;
+    private float marginBottom;
+    private TableRow.LayoutParams dividertexTViewParams = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -39,6 +45,15 @@ public class DetailsStockFragment extends Fragment
     public void onActivityCreated(Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
+        
+        marginLeft = getResources().getDimension(R.dimen.details_divider_margin_left);
+        marginTop = getResources().getDimension(R.dimen.details_divider_margin_top);
+        marginRight = getResources().getDimension(R.dimen.details_divider_margin_right);
+        marginBottom = getResources().getDimension(R.dimen.details_divider_margin_bottom);
+        
+        dividertexTViewParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, 1);
+        dividertexTViewParams.weight = 1;
+        dividertexTViewParams.setMargins((int) marginLeft, (int) marginTop, (int) marginRight, (int) marginBottom);
 
         TextView detailsStockSymbol = (TextView) getView().findViewById(R.id.detailsStockSymbol);
         detailsStockSymbol.setText(quote.getSymbol());
@@ -90,16 +105,7 @@ public class DetailsStockFragment extends Fragment
         tableRow.setLayoutParams(tableRowParams);
 
         TextView v = new TextView(getActivity());
-
-        float marginLeft = getResources().getDimension(R.dimen.details_divider_margin_left);
-        float marginTop = getResources().getDimension(R.dimen.details_divider_margin_top);
-        float marginRight = getResources().getDimension(R.dimen.details_divider_margin_right);
-        float marginBottom = getResources().getDimension(R.dimen.details_divider_margin_bottom);
-
-        TableRow.LayoutParams textViewParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, 1);
-        textViewParams.weight = 1;
-        textViewParams.setMargins((int) marginLeft, (int) marginTop, (int) marginRight, (int) marginBottom);
-        v.setLayoutParams(textViewParams);
+        v.setLayoutParams(dividertexTViewParams);
         v.setBackgroundColor(getResources().getColor(R.color.details_divider));
 
         tableRow.addView(v);
