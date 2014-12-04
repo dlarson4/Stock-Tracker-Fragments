@@ -290,16 +290,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
         {
             Logger.debug("%s.%s: BackStackEntryCount = '%d'", CLASS_NAME, "cancelAddNewStock", getFragmentManager().getBackStackEntryCount());
         }
-        
-        getFragmentManager().popBackStack();
-        getFragmentManager().executePendingTransactions();
-        
-        final String currentFragment = getCurrentFragmentTag();
-        
-        if(Logger.isDebugEnabled())
-        {
-            Logger.debug("%s.%s: getCurrentFragmentTag() = '%s'", CLASS_NAME, "cancelAddNewStock", currentFragment);
-        }
+        goToPreviousFragment();
     }
 
     @Override
@@ -328,15 +319,12 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
         {
             Logger.debug("%s.%s: BackStackEntryCount = '%d'", CLASS_NAME, "cancelUpdateStock", getFragmentManager().getBackStackEntryCount());
         }
-        
+        goToPreviousFragment();
+    }
+    
+    private void goToPreviousFragment()
+    {
         getFragmentManager().popBackStack();
         getFragmentManager().executePendingTransactions();
-        
-        final String currentFragment = getCurrentFragmentTag();
-        
-        if(Logger.isDebugEnabled())
-        {
-            Logger.debug("%s.%s: getCurrentFragmentTag() = '%s'", CLASS_NAME, "cancelUpdateStock", currentFragment);
-        }
     }
 }
