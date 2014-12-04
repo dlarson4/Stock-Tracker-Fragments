@@ -25,11 +25,6 @@ public class Logger
         log(DEBUG, TAG, null, message, args);
     }
 
-    public static void debug(final Throwable t, final String message, final Object... args)
-    {
-        log(DEBUG, TAG, t, message, args);
-    }
-
     public static void warn(String message, Object... args)
     {
         log(WARN, TAG, null, message, args);
@@ -58,14 +53,7 @@ public class Logger
             {
                 if(DEBUG_LOG_ENABLED)
                 {
-                    if(error == null)
-                    {
-                        Log.d(tag, String.format(message, args));
-                    }
-                    else
-                    {
-                        Log.d(tag, String.format(message, args), error);
-                    }
+                    Log.d(tag, String.format(message, args));
                 }
                 break;
             }
