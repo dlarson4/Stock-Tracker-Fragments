@@ -28,7 +28,7 @@ public class StockTable
     
     public static void onCreate(SQLiteDatabase database) 
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Creating SQLLite database as '%s'.", CLASS_NAME, "onCreate", DATABASE_CREATE);
         }
@@ -38,7 +38,7 @@ public class StockTable
 
     public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Upgrading database from version %d to %d", CLASS_NAME, "onUpgrade");
         }

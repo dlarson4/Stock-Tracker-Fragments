@@ -111,7 +111,7 @@ public class UrlBuilder
 
             String query = String.format(YQL_STOCK_EXISTS_QUERY, this.stockSymbol);
 
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: query = '%s'", CLASS_NAME, "build", query.toString());
             }

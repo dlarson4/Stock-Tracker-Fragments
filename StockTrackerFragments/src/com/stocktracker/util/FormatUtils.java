@@ -47,7 +47,7 @@ public class FormatUtils
         }
         catch(NumberFormatException e)
         {
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.error(e, "%s.%s: Error parsing '%d'.", CLASS_NAME, "twoFractionDigitFormat", bd);
             }

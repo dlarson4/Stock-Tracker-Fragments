@@ -59,7 +59,7 @@ public class AddStockFragment extends Fragment
     {
         super.onCreate(savedInstanceState);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s:", CLASS_NAME, "onCreate");
         }
@@ -109,7 +109,7 @@ public class AddStockFragment extends Fragment
         String stockSymbol = symbolEditText.getText().toString();
         String quantityStr = quantityEditText.getText().toString();
 
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Stock symbol value entered = '%s', quantity = '%s'.", CLASS_NAME, "addStock", stockSymbol, quantityStr);
         }
@@ -128,7 +128,7 @@ public class AddStockFragment extends Fragment
         {
             boolean duplicate = dao.isDuplicate(stockSymbol);
 
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Stock '%s' is duplicate? '%b'", CLASS_NAME, "saveNewStock", stockSymbol, duplicate);
             }
@@ -142,7 +142,7 @@ public class AddStockFragment extends Fragment
             {
                 final String url = UrlBuilder.buildQuoteUrl(stockSymbol);
 
-                if(Logger.isDebugEnabled())
+                if(Logger.isLoggingEnabled())
                 {
                     Logger.debug("%s.%s: UrlBuilder.buildQuoteUrl() returned '%s'.", CLASS_NAME, "saveNewStock", url);
                 }
@@ -152,7 +152,7 @@ public class AddStockFragment extends Fragment
                 extras.putDouble("QUANTITY", Double.parseDouble(quantityStr));
                 Intent intent = DownloadIntentService.createIntent(this.getActivity(), Uri.parse(url), downloadHandler, extras, 0);
                 
-                if(Logger.isDebugEnabled())
+                if(Logger.isLoggingEnabled())
                 {
                     Logger.debug("%s.%s: Starting download intent service.", CLASS_NAME, "saveNewStock");
                 }
@@ -208,7 +208,7 @@ public class AddStockFragment extends Fragment
     {
         if(Utils.isValidStock(quoteResponse))
         {
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: New stock '%s' verified.", CLASS_NAME, "addStockDone", ticker);
             }

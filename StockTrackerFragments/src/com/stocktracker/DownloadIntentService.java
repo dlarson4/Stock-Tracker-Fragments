@@ -39,7 +39,7 @@ public class DownloadIntentService extends IntentService
     {
         final String url = intent.getData().toString();
 
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Download URI = '%s'.", CLASS_NAME, "onHandleIntent", url);
         }
@@ -57,7 +57,7 @@ public class DownloadIntentService extends IntentService
 
         if(response.isError())
         {
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Server did not respond.", CLASS_NAME, "onPostExecute");
             }
@@ -117,7 +117,7 @@ public class DownloadIntentService extends IntentService
             QuoteResponseStrategy parser = new QuoteResponseStrategy();
             quoteResponse = parser.parse(json);
 
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Parsed JSON = '%s'.", CLASS_NAME, "parseResponse", String.valueOf(quoteResponse));
             }
@@ -175,7 +175,7 @@ public class DownloadIntentService extends IntentService
     
     private void logResponse(HttpTaskResponse response)
     {
-        if(Logger.isDebugEnabled() && response != null && response.getData() != null && response.getData().length() < MAX_DEBUG_CONTENT_LENGTH)
+        if(Logger.isLoggingEnabled() && response != null && response.getData() != null && response.getData().length() < MAX_DEBUG_CONTENT_LENGTH)
         {
             Logger.debug("%s.%s: HTTP response = '%s'.", CLASS_NAME, "doInBackground", response);
         }
@@ -183,7 +183,7 @@ public class DownloadIntentService extends IntentService
     
     private void log(JSONObject json)
     {
-        if(Logger.isDebugEnabled() && json != null)
+        if(Logger.isLoggingEnabled() && json != null)
         {
             if(json.length() < MAX_DEBUG_CONTENT_LENGTH)
             {

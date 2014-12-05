@@ -28,7 +28,7 @@ public class HttpRequestWrapper
 
     public void execute()
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Performing HTTP GET of URL '%s'.", CLASS_NAME, "execute", this.url);
         }
@@ -45,7 +45,7 @@ public class HttpRequestWrapper
                 urlConnection.disconnect();
             }
         }
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Done.", CLASS_NAME, "execute");
         }
@@ -68,7 +68,7 @@ public class HttpRequestWrapper
             String responseMessage = urlConnection.getResponseMessage();
             responseCode = urlConnection.getResponseCode();
 
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: HTTP status code = '%d', response message = '%s'.", CLASS_NAME, "doHttpGet", responseCode, responseMessage);
             }

@@ -59,7 +59,7 @@ public class DetailsStockFragment extends Fragment
         detailsStockSymbol.setText(quote.getSymbol());
 
         TableLayout table = (TableLayout) getView().findViewById(R.id.detailsTable);
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: table = '%s'", CLASS_NAME, "onActivityCreated", table);
         }

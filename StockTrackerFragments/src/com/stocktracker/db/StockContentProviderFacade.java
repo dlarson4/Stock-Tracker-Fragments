@@ -37,14 +37,14 @@ public class StockContentProviderFacade
         
         final Uri uri = StockContract.CONTENT_URI;
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Uri for content provider = '%s'", CLASS_NAME, "insert", uri);
         }
         
         Uri newRowUri = context.getContentResolver().insert(uri, values);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: newRowUri = '%s'", CLASS_NAME, "insert", newRowUri);
         }
@@ -64,14 +64,14 @@ public class StockContentProviderFacade
     {
         final Uri uri = Uri.parse(StockContract.CONTENT_URI.toString() + "/" + id);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Uri for content provider = '%s'", CLASS_NAME, "delete", uri);
         }
         
         int rowsDeleted = context.getContentResolver().delete(uri, null, null);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: rowsDeleted = '%d'", CLASS_NAME, "delete", rowsDeleted);
         }
@@ -87,7 +87,7 @@ public class StockContentProviderFacade
         
         final Uri uri = StockContract.CONTENT_URI;
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Uri for content provider = '%s'", CLASS_NAME, "isDuplicate", uri);
         }
@@ -95,7 +95,7 @@ public class StockContentProviderFacade
         Cursor cursor = null;
         try
         {
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: About to get cursor", CLASS_NAME, "isDuplicate");
             }
@@ -117,7 +117,7 @@ public class StockContentProviderFacade
         final String[] projection = StockTable.ALL_COLUMNS;
         final Uri uri = StockContract.CONTENT_URI;
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Uri for content provider = '%s'", CLASS_NAME, "getStocks", uri);
         }
@@ -125,7 +125,7 @@ public class StockContentProviderFacade
         Cursor cursor = null;
         try
         {
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: About to get cursor", CLASS_NAME, "getStocks");
             }
@@ -174,7 +174,7 @@ public class StockContentProviderFacade
         
         final Uri uri = Uri.parse(StockContract.CONTENT_URI.toString() + "/" + id);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Uri for content provider = '%s'", CLASS_NAME, "update", uri);
         }

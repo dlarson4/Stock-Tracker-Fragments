@@ -36,7 +36,7 @@ public class JsonParser
     @SuppressLint("SimpleDateFormat")
     public static QuoteResponse createResponse(JSONObject json) throws JSONException
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Converting JSON to QuoteResponse.  JSON='%s'.", CLASS_NAME, "createResponse", json);
         }
@@ -78,7 +78,7 @@ public class JsonParser
             }
         }
 
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Returning response '%s'", CLASS_NAME, "createResponse", response);
         }
@@ -132,7 +132,7 @@ public class JsonParser
                 java.lang.reflect.Method method = null;
                 try
                 {
-                    if(Logger.isDebugEnabled())
+                    if(Logger.isLoggingEnabled())
                     {
                         Logger.debug("%s.%s: Attempting to access method '%s'", CLASS_NAME, "parseCreatedDate", methodName);
                     }
@@ -152,7 +152,7 @@ public class JsonParser
                 {
                     if(method == null)
                     {
-                        if(Logger.isDebugEnabled())
+                        if(Logger.isLoggingEnabled())
                         {
                             Logger.debug("%s.%s: Unable to access method '%s'", CLASS_NAME, "createQuote", methodName);
                         }
@@ -160,7 +160,7 @@ public class JsonParser
                     else
                     {
                         String value = json.getString(field);
-                        if(Logger.isDebugEnabled())
+                        if(Logger.isLoggingEnabled())
                         {
                             Logger.debug("%s.%s: Invoking method '%s' with value '%s'", CLASS_NAME, "createQuote", methodName, value);
                         }
@@ -200,7 +200,7 @@ public class JsonParser
 //        quote.setVolume(json.getString("Volume"));
 //        quote.setStockExchange(json.getString("StockExchange"));
 
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Final quote object: '%s'", CLASS_NAME, "createQuote", quote);
         }

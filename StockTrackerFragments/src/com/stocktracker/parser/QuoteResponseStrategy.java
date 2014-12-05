@@ -13,7 +13,7 @@ public class QuoteResponseStrategy extends ParseStrategy<QuoteResponse>
     @Override
     public QuoteResponse parse(JSONObject json)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s $s: Parse called.  JSON='%s'", CLASS_NAME, "parse", json);
         }

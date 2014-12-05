@@ -84,7 +84,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
         
         if(this.quoteList != null)
         {
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Saving stock list", CLASS_NAME, "onSaveInstanceState");
             }
@@ -98,7 +98,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
     {
         super.onAttach(activity);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s:", CLASS_NAME, "onAttach");
         }
@@ -118,7 +118,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
     {
         super.onCreate(savedInstanceState);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s:", CLASS_NAME, "onCreate");
         }
@@ -130,7 +130,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s:", CLASS_NAME, "onCreateView");
         }
@@ -138,13 +138,13 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
         if(savedInstanceState != null)
         {
             this.quoteList = (List)savedInstanceState.getParcelableArrayList(FRAGMENT_LIST_KEY);
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Restored quote list = '%s'", CLASS_NAME, "onCreateView", quoteList);
             }
             
             this.stockList = (List)savedInstanceState.getParcelableArrayList(STOCK_LIST_KEY);
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Restored stock list = '%s'", CLASS_NAME, "onCreateView", stockList);
             }
@@ -158,7 +158,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
     {
         super.onActivityCreated(savedInstanceState);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s:", CLASS_NAME, "onActivityCreated");
         }
@@ -168,7 +168,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id)
             {
-                if(Logger.isDebugEnabled())
+                if(Logger.isLoggingEnabled())
                 {
                     Logger.debug("%s.%s: onItemLongClick called, position = %d, id = %d", CLASS_NAME, "onItemLongClick", position, id);
                 }
@@ -221,7 +221,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
     {
         super.onResume();
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s:", CLASS_NAME, "onResume");
         }
@@ -243,7 +243,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
     @Override
     public void onStocksLoadedFromDatabase(List<Stock> stocks)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Stock list loaded.", CLASS_NAME, "onStocksLoadedFromDatabase");
         }
@@ -288,7 +288,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
         final BigDecimal marketValue = FormatUtils.getTotalMarketValue(quoteList);
         final BigDecimal previousMarketValue = FormatUtils.getPreviousMarketValue(quoteList);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Market Total BigDecimal = '%s'.", CLASS_NAME, "updateStockList", marketValue);
             Logger.debug("%s.%s: Previous Market Total BigDecimal = '%s'.", CLASS_NAME, "updateStockList", previousMarketValue);
@@ -301,7 +301,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
 
         stockListView.setAdapter(adapter);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Done setting adapter", CLASS_NAME, "updateStockList", marketValue);
         }
@@ -334,7 +334,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
     {
         if(this.isVisible())
         {
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Enabling refresh button.", CLASS_NAME, "enableRefreshButton", "run");
             }
@@ -372,7 +372,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
         }
         
         Quote quote = ((QuoteListItem)listItem).getQuote();
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Selected quote = '%s'", CLASS_NAME, "onActionItemClicked", quote);
         }
@@ -383,7 +383,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
         {
             case R.id.action_edit:
             {
-                if(Logger.isDebugEnabled())
+                if(Logger.isLoggingEnabled())
                 {
                     Logger.debug("%s.%s: Edit", CLASS_NAME, "onActionItemClicked");
                 }
@@ -393,7 +393,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
             }
             case R.id.action_details:
             {
-                if(Logger.isDebugEnabled())
+                if(Logger.isLoggingEnabled())
                 {
                     Logger.debug("%s.%s: Details", CLASS_NAME, "onActionItemClicked");
                 }
@@ -403,7 +403,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
             }
             case R.id.action_delete:
             {
-                if(Logger.isDebugEnabled())
+                if(Logger.isLoggingEnabled())
                 {
                     Logger.debug("%s.%s: Delete", CLASS_NAME, "onActionItemClicked");
                 }
@@ -425,14 +425,14 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
     
     private void retrieveStockQuotesFromWebService()
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: ", CLASS_NAME, "retrieveStockQuotesFromWebService");
         }
         
         final String url = UrlBuilder.buildAllStocksQuoteUrl(this.stockList);
 
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: buildAllStocksQuoteUrl() returned '%s'.", CLASS_NAME, "retrieveStockQuotesFromWebService", url);
         }
@@ -448,7 +448,7 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
             
             Intent intent = DownloadIntentService.createIntent(this.getActivity(), Uri.parse(url), downloadHandler, null, 0);
             
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Starting download intent service.", CLASS_NAME, "retrieveStockQuotesFromWebService");
             }
@@ -565,13 +565,13 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
                 Stock s = getStockBySymbol(stockList, q.getSymbol());
                 if(s != null)
                 {
-                    if(Logger.isDebugEnabled())
+                    if(Logger.isLoggingEnabled())
                     {
                         Logger.debug("%s.%s: Adding quantity to Quote for symbol '%s'", CLASS_NAME, "updateQuoteResponseObjects", q.getSymbol());
                     }
                     q.setQuantity(s.getQuantity());
                     
-                    if(Logger.isDebugEnabled())
+                    if(Logger.isLoggingEnabled())
                     {
                         Logger.debug("%s.%s: Adding SQLite id to Quote for symbol '%s'", CLASS_NAME, "updateQuoteResponseObjects", q.getSymbol());
                     }

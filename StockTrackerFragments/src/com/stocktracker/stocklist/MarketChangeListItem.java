@@ -60,7 +60,7 @@ public class MarketChangeListItem implements StockTrackerListItem
             // change as a percent
             String changeSymbol = FormatUtils.getChangeSymbol(inflater.getContext(), changeType);
             
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: previousValue = '%s'", CLASS_NAME, "getView", previousValue);
             }

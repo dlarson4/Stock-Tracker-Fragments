@@ -37,7 +37,7 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor>
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: ", CLASS_NAME, "onCreateLoader");
         }
@@ -51,7 +51,7 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor>
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: ", CLASS_NAME, "onLoadFinished");
         }
@@ -64,7 +64,7 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor>
             {
                 do
                 {
-                    if(Logger.isDebugEnabled())
+                    if(Logger.isLoggingEnabled())
                     {
                         Logger.debug("%s.%s: Creating stock", CLASS_NAME, "onLoadFinished");
                     }
@@ -82,7 +82,7 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor>
     @Override
     public void onLoaderReset(Loader<Cursor> loader)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: ", CLASS_NAME, "onLoaderReset");
         }

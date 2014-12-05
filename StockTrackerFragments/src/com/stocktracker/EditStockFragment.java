@@ -47,7 +47,7 @@ public class EditStockFragment extends Fragment
         
         if(this.quote != null)
         {
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Saving stock to edit", CLASS_NAME, "onSaveInstanceState");
             }
@@ -61,7 +61,7 @@ public class EditStockFragment extends Fragment
         if(savedInstanceState != null)
         {
             this.quote = (Quote)savedInstanceState.getParcelable(QUOTE_KEY);
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Restored quote = '%s'", CLASS_NAME, "onCreateView", quote);
             }
@@ -112,7 +112,7 @@ public class EditStockFragment extends Fragment
 
         String quantityStr = quantityEditText.getText().toString();
 
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: New quantity for stock '%s' = '%s'.", CLASS_NAME, "addStock", quote.getSymbol(), quantityStr);
         }

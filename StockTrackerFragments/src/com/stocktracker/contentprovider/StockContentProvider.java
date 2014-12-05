@@ -45,7 +45,7 @@ public class StockContentProvider extends ContentProvider
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: uri = '%s'", CLASS_NAME, "query", uri);
         }
@@ -57,7 +57,7 @@ public class StockContentProvider extends ContentProvider
 
         int uriType = URI_MATCHER.match(uri);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: uriType = '%s'", CLASS_NAME, "query", uriType);
         }
@@ -97,7 +97,7 @@ public class StockContentProvider extends ContentProvider
     @Override
     public String getType(Uri uri)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: uri = '%s'", CLASS_NAME, "getType", uri);
         }
@@ -116,7 +116,7 @@ public class StockContentProvider extends ContentProvider
     @Override
     public Uri insert(Uri uri, ContentValues values)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: uri = '%s'", CLASS_NAME, "insert", uri);
         }
@@ -141,7 +141,7 @@ public class StockContentProvider extends ContentProvider
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: uri = '%s'", CLASS_NAME, "delete", uri);
         }
@@ -182,7 +182,7 @@ public class StockContentProvider extends ContentProvider
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: uri = '%s'", CLASS_NAME, "update", uri);
         }

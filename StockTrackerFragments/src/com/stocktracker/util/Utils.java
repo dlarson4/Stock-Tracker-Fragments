@@ -43,7 +43,7 @@ public class Utils
         }
         catch(NumberFormatException e)
         {
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Error parsing quantity '%s' to double.", CLASS_NAME, "isValidQuantity", quantityStr);
             }

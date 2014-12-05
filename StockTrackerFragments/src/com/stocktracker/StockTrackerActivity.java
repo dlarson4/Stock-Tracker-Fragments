@@ -33,7 +33,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     {
         super.onCreate(savedInstanceState);
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: ", CLASS_NAME, "onCreate");
         }
@@ -46,7 +46,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
         {
             savedFragmentTag = savedInstanceState.getString(FRAGMENT_TAG);
                     
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: savedFragmentTag = '%s'", CLASS_NAME, "onCreate", savedFragmentTag);
             }
@@ -59,7 +59,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
         super.onSaveInstanceState(outState);
         
         final String currentFragmentTag = getCurrentFragmentTag();
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: currentFragmentTag = '%s'", CLASS_NAME, "onSaveInstanceState", currentFragmentTag);
         }
@@ -75,7 +75,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     {
         super.onResume();
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: savedFragmentTag = '%s'", CLASS_NAME, "onResume", savedFragmentTag);
         }
@@ -104,7 +104,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
         {
             f = getFragmentManager().findFragmentByTag(tag);
             
-            if(Logger.isDebugEnabled())
+            if(Logger.isLoggingEnabled())
             {
                 Logger.debug("%s.%s: Fragment tag found '%s', isVisible? = '%b'", CLASS_NAME, "getCurrentFragmentTag", tag, (f == null ? false : f.isVisible()));
             }
@@ -158,7 +158,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     @Override
     public void addClicked(View view)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Adding stock", CLASS_NAME, "addClicked");
         }
@@ -169,7 +169,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     @Override
     public void editStock(Quote quote)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Edit", CLASS_NAME, "editStock");
         }
@@ -179,7 +179,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     @Override
     public void deleteStock(String symbol, long id)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Delete", CLASS_NAME, "deleteStock");
         }
@@ -189,7 +189,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     @Override
     public void viewStockDetails(Quote quote, long id)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Details", CLASS_NAME, "viewStockDetails");
         }
@@ -215,7 +215,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     
     private void deleteStock(long id)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Deleting stock '%d'.", CLASS_NAME, "deleteStock", id);
         }
@@ -248,14 +248,14 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     
     private void insertStockSymbol(QuoteResponse parsed, double quantity)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Inserting new stock, QuoteResponse = '%s'", CLASS_NAME, "insertStockSymbol", parsed);
         }
         
         Stock newStock = dao.insert(parsed.getQuotes().get(0).getSymbol(), quantity); // TODO should be made asynchronous
 
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Newly created stock = '%s'", CLASS_NAME, "insertStockSymbol", newStock);
         }
@@ -267,7 +267,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     @Override
     public void saveNewStock(QuoteResponse quoteResponse, double quantity)
     {
-      if(Logger.isDebugEnabled())
+      if(Logger.isLoggingEnabled())
       {
           Logger.debug("%s.%s: Saving new stock", CLASS_NAME, "saveNewStock");
       }
@@ -286,7 +286,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     @Override
     public void cancelAddNewStock()
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: BackStackEntryCount = '%d'", CLASS_NAME, "cancelAddNewStock", getFragmentManager().getBackStackEntryCount());
         }
@@ -296,14 +296,14 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     @Override
     public void updateStockQuantity(String symbol, double quantity, long id)
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: Updating stock '%s' to quantity '%f'.", CLASS_NAME, "updateStock", symbol, quantity);
         }
         
         int rowsUpdated = dao.update(id, quantity); // TODO should be made asynchronous
         
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: rowsUpdated = '%d'.", CLASS_NAME, "updateStock", rowsUpdated);
         }
@@ -315,7 +315,7 @@ public class StockTrackerActivity extends Activity implements AddStockFragment.A
     @Override
     public void cancelUpdateStock()
     {
-        if(Logger.isDebugEnabled())
+        if(Logger.isLoggingEnabled())
         {
             Logger.debug("%s.%s: BackStackEntryCount = '%d'", CLASS_NAME, "cancelUpdateStock", getFragmentManager().getBackStackEntryCount());
         }

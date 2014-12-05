@@ -11,13 +11,11 @@ public class Logger
 {
     private final static String TAG = "StockTracker";
 
-    private final static boolean DEBUG_LOG_ENABLED = BuildConfig.DEBUG;
-    private final static boolean WARN_LOG_ENABLED = true;
-    private final static boolean ERROR_LOG_ENABLED = true;
+    private final static boolean LOGGING_ENABLED = BuildConfig.DEBUG;
 
-    public static boolean isDebugEnabled()
+    public static boolean isLoggingEnabled()
     {
-        return DEBUG_LOG_ENABLED;
+        return LOGGING_ENABLED;
     }
 
     public static void debug(String message, Object... args)
@@ -47,11 +45,16 @@ public class Logger
 
     private static void log(int level, final String tag, final Throwable error, final String message, final Object... args)
     {
+        if(!LOGGING_ENABLED)
+        {
+            return;
+        }
+        
         switch(level)
         {
             case DEBUG:
             {
-                if(DEBUG_LOG_ENABLED)
+                //if(DEBUG_LOG_ENABLED)
                 {
                     Log.d(tag, String.format(message, args));
                 }
@@ -59,7 +62,7 @@ public class Logger
             }
             case WARN:
             {
-                if(WARN_LOG_ENABLED)
+                //if(WARN_LOG_ENABLED)
                 {
                     if(error == null)
                     {
@@ -74,7 +77,7 @@ public class Logger
             }
             case ERROR:
             {
-                if(ERROR_LOG_ENABLED)
+                //if(ERROR_LOG_ENABLED)
                 {
                     if(error == null)
                     {
