@@ -56,7 +56,7 @@ public class DetailsStockFragment extends Fragment
         dividertexTViewParams.setMargins((int) marginLeft, (int) marginTop, (int) marginRight, (int) marginBottom);
 
         TextView detailsStockSymbol = (TextView) getView().findViewById(R.id.detailsStockSymbol);
-        detailsStockSymbol.setText(quote.getSymbol());
+        detailsStockSymbol.setText(quote.getName() + " (" + quote.getSymbol() + ")");
 
         TableLayout table = (TableLayout) getView().findViewById(R.id.detailsTable);
         if(Logger.isLoggingEnabled())
