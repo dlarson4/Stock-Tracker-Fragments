@@ -126,7 +126,7 @@ public class AddStockFragment extends Fragment
         }
         else
         {
-            boolean duplicate = dao.isDuplicate(stockSymbol);
+            boolean duplicate = dao.isDuplicate(stockSymbol); // TODO should be made asynchronous
 
             if(Logger.isLoggingEnabled())
             {
