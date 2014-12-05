@@ -76,6 +76,8 @@ public class DetailsStockFragment extends Fragment
             tableLayout.setLayoutParams(tableParams);
 
             SortedMap<String, String> map = getDetailsMap();
+            final int mapSize = map.size();
+            int count = 0;
             for (String key : map.keySet())
             {
                 TextView detailNameTextView = new TextView(getActivity());
@@ -94,7 +96,12 @@ public class DetailsStockFragment extends Fragment
 
                 table.addView(tableRow);
 
-                table.addView(createSeparator(tableParams));
+                if(count+1 < mapSize)
+                {
+                    table.addView(createSeparator(tableParams));
+                }
+                
+                count++;
             }
         }
     }
