@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:id="@+id/stockListLayout">
+
+    <ImageView
+        android:id="@+id/imgProgress"
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:scaleType="fitXY"
+        android:contentDescription="@string/refreshing"
+        android:src="@drawable/progress_bar"
+        android:adjustViewBounds="true"
+        android:visibility="invisible" />
+    
+    <ListView
+        android:id="@android:id/list"
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:choiceMode="singleChoice"
+        android:divider="#FFCC00"
+        android:layout_weight="1"
+        android:orientation="vertical" />
+
+    
+    <!-- <ListView
+        android:id="@+id/linearStockLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/imgProgress"
+        android:layout_alignParentLeft="true"
+        android:choiceMode="singleChoice"
+        android:divider="#FFCC00"
+        android:orientation="vertical" >
+    </ListView> -->
+    
+    
+	<RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp">
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dip"
+            android:layout_marginLeft="4dip"
+            android:layout_marginRight="4dip"
+            android:background="?android:attr/dividerVertical"
+            android:layout_alignParentTop="true"/>
+        <View
+            android:id="@+id/verticalDivider"
+            android:layout_width="1dip"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="4dip"
+            android:layout_marginTop="4dip"
+            android:background="?android:attr/dividerVertical" 
+            android:layout_centerHorizontal="true"/>
+            
+        <ImageButton
+            android:id="@+id/refreshButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/refresh_holo_light"
+            android:layout_alignParentBottom="true" 
+            android:layout_toLeftOf="@id/verticalDivider"
+            android:contentDescription="@string/refresh"/>
+        
+        <ImageButton 
+            android:id="@+id/addButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@id/verticalDivider"
+            android:background="?android:attr/selectableItemBackground"
+            android:src="@drawable/add_stock_holo_light"
+            android:text="@android:string/cancel" 
+            android:layout_alignParentBottom="true"
+            android:contentDescription="@string/add_stock" />
+        
+    </RelativeLayout>
+</LinearLayout>
