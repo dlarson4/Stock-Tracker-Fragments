@@ -5,31 +5,26 @@ import java.util.Calendar;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-public class TotalMarketValueDataPoint implements Comparable<TotalMarketValueDataPoint>
-{
+public class TotalMarketValueDataPoint implements Comparable<TotalMarketValueDataPoint> {
     public Calendar calendar;
     public BigDecimal totalMarketValue;
-    
-    public TotalMarketValueDataPoint(Calendar calendar, BigDecimal totalMarketValue)
-    {
+
+    public TotalMarketValueDataPoint(Calendar calendar, BigDecimal totalMarketValue) {
         super();
         this.calendar = calendar;
         this.totalMarketValue = totalMarketValue;
     }
 
-    public Calendar getCalendar()
-    {
+    public Calendar getCalendar() {
         return calendar;
     }
 
-    public BigDecimal getTotalMarketValue()
-    {
+    public BigDecimal getTotalMarketValue() {
         return totalMarketValue;
     }
 
     @Override
-    public String toString()
-    {
+    public String toString() {
         return ToStringBuilder.reflectionToString(this);
     }
 
@@ -37,8 +32,7 @@ public class TotalMarketValueDataPoint implements Comparable<TotalMarketValueDat
      * Sort by date
      */
     @Override
-    public int compareTo(TotalMarketValueDataPoint other)
-    {
+    public int compareTo(TotalMarketValueDataPoint other) {
         return this.calendar.compareTo(other.getCalendar());
     }
 }

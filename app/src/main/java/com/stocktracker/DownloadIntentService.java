@@ -20,8 +20,7 @@ import com.stocktracker.http.HttpTaskResponse;
 import com.stocktracker.log.Logger;
 import com.stocktracker.parser.QuoteResponseStrategy;
 
-public class DownloadIntentService extends IntentService
-{
+public class DownloadIntentService extends IntentService {
     private static final String WHAT = "WHAT";
     private static final String EXTRAS = "extras";
     public static final String MESSENGER = "MESSENGER";
@@ -29,23 +28,19 @@ public class DownloadIntentService extends IntentService
     private static final String CLASS_NAME = DownloadIntentService.class.getSimpleName();
     private static final int MAX_DEBUG_CONTENT_LENGTH = 50000;
 
-    public DownloadIntentService()
-    {
+    public DownloadIntentService() {
         super(CLASS_NAME);
     }
 
     @Override
-    protected void onHandleIntent(Intent intent)
-    {
+    protected void onHandleIntent(Intent intent) {
         final String url = intent.getData().toString();
 
-        if(Logger.isLoggingEnabled())
-        {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: Download URI = '%s'.", CLASS_NAME, "onHandleIntent", url);
         }
 
-        if(url == null)
-        {
+        if (url == null) {
             return;
         }
 
@@ -55,41 +50,32 @@ public class DownloadIntentService extends IntentService
 
         logResponse(response);
 
-        if(response.isError())
-        {
-            if(Logger.isLoggingEnabled())
-            {
+        if (response.isError()) {
+            if (Logger.isLoggingEnabled()) {
                 Logger.debug("%s.%s: Server did not respond.", CLASS_NAME, "onPostExecute");
             }
-            
+
             sendMessage(intent, null);
-        }
-        else
-        {
+        } else {
             parseResponse(response, intent);
         }
     }
 
-    private void sendMessage(Intent intent, QuoteResponse quoteResponse)
-    {
+    private void sendMessage(Intent intent, QuoteResponse quoteResponse) {
         Messenger messenger = (Messenger) intent.getExtras().get(MESSENGER);
-        
+
         Message message = makeReplyMessage(quoteResponse, intent.getExtras());
         message.what = intent.getExtras().getInt(WHAT);
 
-        try
-        {
+        try {
             // Send the message/response back to the handler
             messenger.send(message);
-        }
-        catch (RemoteException e)
-        {
+        } catch (RemoteException e) {
             Logger.error(e, "%s.%s: Error sending Messenger response from DownloadIntentService.", CLASS_NAME, "sendMessage");
         }
     }
 
-    private Message makeReplyMessage(QuoteResponse quoteResponse, Bundle bundle)
-    {
+    private Message makeReplyMessage(QuoteResponse quoteResponse, Bundle bundle) {
         Message message = Message.obtain();
 
         // Return the result to indicate whether the download succeeded or failed
@@ -98,110 +84,87 @@ public class DownloadIntentService extends IntentService
         Bundle data = new Bundle();
         data.putBundle(EXTRAS, bundle);
         data.putParcelable(QUOTE_RESPONSE, quoteResponse);
-        
+
         message.setData(data);
         return message;
     }
 
-    private void parseResponse(HttpTaskResponse response, Intent intent)
-    {
+    private void parseResponse(HttpTaskResponse response, Intent intent) {
         //Messenger messenger = (Messenger) intent.getExtras().get(MESSENGER);
-        QuoteResponse quoteResponse =  null;
-        
+        QuoteResponse quoteResponse = null;
+
         JSONObject json = null;
-        try
-        {
+        try {
             json = new JSONObject(response.getData());
             log(json);
 
             QuoteResponseStrategy parser = new QuoteResponseStrategy();
             quoteResponse = parser.parse(json);
 
-            if(Logger.isLoggingEnabled())
-            {
+            if (Logger.isLoggingEnabled()) {
                 Logger.debug("%s.%s: Parsed JSON = '%s'.", CLASS_NAME, "parseResponse", String.valueOf(quoteResponse));
             }
-        }
-        catch (JSONException e)
-        {
+        } catch (JSONException e) {
             Logger.error(e, "%s.%s: Failed to parse JSON from result.", CLASS_NAME, "parseResponse");
         }
-        
+
         sendMessage(intent, quoteResponse);
     }
 
-    public static QuoteResponse getQuoteResponse(Message message)
-    {
+    public static QuoteResponse getQuoteResponse(Message message) {
         Bundle data = message.getData();
 
         // Extract the pathname from the Bundle.
         QuoteResponse quoteResponse = data.getParcelable(QUOTE_RESPONSE);
 
         // Check to see if the download succeeded.
-        if(message.arg1 != Activity.RESULT_OK || quoteResponse == null)
-        {
+        if (message.arg1 != Activity.RESULT_OK || quoteResponse == null) {
             return null;
-        }
-        else
-        {
+        } else {
             return quoteResponse;
         }
     }
-    
-    public static Bundle getExtras(Message message)
-    {
+
+    public static Bundle getExtras(Message message) {
         Bundle data = message.getData();
         return data.getBundle(EXTRAS);
     }
 
-    public static int getWhat(Message message)
-    {
+    public static int getWhat(Message message) {
         Bundle data = message.getData();
         return data.getInt(WHAT);
     }
-    
-    public static Intent createIntent(Context context, Uri uri, Handler downloadHandler, Bundle extras, int what)
-    {
+
+    public static Intent createIntent(Context context, Uri uri, Handler downloadHandler, Bundle extras, int what) {
         Intent intent = new Intent(context, DownloadIntentService.class);
         intent.setData(uri);
         intent.putExtra(MESSENGER, new Messenger(downloadHandler));
-        if(extras != null)
-        {
+        if (extras != null) {
             intent.putExtras(extras);
         }
         intent.putExtra(WHAT, what);
         return intent;
     }
-    
-    private void logResponse(HttpTaskResponse response)
-    {
-        if(Logger.isLoggingEnabled() && response != null && response.getData() != null && response.getData().length() < MAX_DEBUG_CONTENT_LENGTH)
-        {
+
+    private void logResponse(HttpTaskResponse response) {
+        if (Logger.isLoggingEnabled() && response != null && response.getData() != null && response.getData().length() < MAX_DEBUG_CONTENT_LENGTH) {
             Logger.debug("%s.%s: HTTP response = '%s'.", CLASS_NAME, "doInBackground", response);
         }
     }
-    
-    private void log(JSONObject json)
-    {
-        if(Logger.isLoggingEnabled() && json != null)
-        {
-            if(json.length() < MAX_DEBUG_CONTENT_LENGTH)
-            {
-                try
-                {
+
+    private void log(JSONObject json) {
+        if (Logger.isLoggingEnabled() && json != null) {
+            if (json.length() < MAX_DEBUG_CONTENT_LENGTH) {
+                try {
                     Logger.debug("%s.%s: Parsed JSON: %s", CLASS_NAME, "parseResponse", json.toString(4));
-                }
-                catch (JSONException e)
-                {
+                } catch (JSONException e) {
                     Logger.error(e, "%s.%s: Failed to parse JSON from result.", CLASS_NAME, "logParsedJSON");
                 }
-            }
-            else
-            {
+            } else {
                 Logger.debug("%s.%s: Parsed JSON is too big to display (length = %d).", CLASS_NAME, "logParsedJSON", json.length());
             }
         }
     }
 
-    
+
 }

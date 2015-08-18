@@ -6,24 +6,20 @@ import android.view.View;
 import com.stocktracker.R;
 import com.stocktracker.stocklist.QuoteAdapter.RowType;
 
-public class HeaderListItem implements StockTrackerListItem
-{
+public class HeaderListItem implements StockTrackerListItem {
     @Override
-    public int getViewType()
-    {
+    public int getViewType() {
         return RowType.HEADER_ITEM.ordinal();
     }
 
     @Override
-    public View getView(LayoutInflater inflater, View convertView)
-    {
+    public View getView(LayoutInflater inflater, View convertView) {
         View headerRow = convertView;
 
-        if(headerRow == null)
-        {
+        if (headerRow == null) {
             headerRow = inflater.inflate(R.layout.header_row_layout, null);
         }
-        
+
         return headerRow;
     }
 }

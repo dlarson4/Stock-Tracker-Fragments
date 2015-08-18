@@ -16,29 +16,24 @@ import com.stocktracker.data.Stock;
 import com.stocktracker.db.StockTable;
 import com.stocktracker.log.Logger;
 
-public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor>
-{
+public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final Object CLASS_NAME = StockLoader.class.getSimpleName();
-    
+
     private Context context;
     private StockLoaderCallback callback;
-    
-    static interface StockLoaderCallback
-    {
+
+    static interface StockLoaderCallback {
         void onStocksLoadedFromDatabase(List<Stock> stocks);
     }
 
-    public StockLoader(Context context, StockLoaderCallback callback)
-    {
+    public StockLoader(Context context, StockLoaderCallback callback) {
         this.context = context;
         this.callback = callback;
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args)
-    {
-        if(Logger.isLoggingEnabled())
-        {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: ", CLASS_NAME, "onCreateLoader");
         }
 
@@ -49,47 +44,37 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor>
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor)
-    {
-        if(Logger.isLoggingEnabled())
-        {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: ", CLASS_NAME, "onLoadFinished");
         }
 
         List<Stock> stocks = new ArrayList<Stock>();
-        
-        if(cursor != null)
-        {
-            if(cursor.moveToFirst())
-            {
-                do
-                {
-                    if(Logger.isLoggingEnabled())
-                    {
+
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                do {
+                    if (Logger.isLoggingEnabled()) {
                         Logger.debug("%s.%s: Creating stock", CLASS_NAME, "onLoadFinished");
                     }
                     stocks.add(createStock(cursor));
                 } while (cursor.moveToNext());
             }
         }
-        
-        if(callback != null)
-        {
+
+        if (callback != null) {
             callback.onStocksLoadedFromDatabase(stocks);
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader)
-    {
-        if(Logger.isLoggingEnabled())
-        {
+    public void onLoaderReset(Loader<Cursor> loader) {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: ", CLASS_NAME, "onLoaderReset");
         }
     }
 
-    private Stock createStock(Cursor cursor)
-    {
+    private Stock createStock(Cursor cursor) {
         long id = cursor.getLong(0);
         String stock = cursor.getString(1);
         double quantity = cursor.getDouble(2);

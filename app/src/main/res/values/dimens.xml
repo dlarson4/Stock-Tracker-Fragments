@@ -13,5 +13,10 @@
     <dimen name="details_divider_margin_top">3dp</dimen>
     <dimen name="details_divider_margin_right">5dp</dimen>
     <dimen name="details_divider_margin_bottom">3dp</dimen>
+
+    <dimen name="stock_symbol_and_name_layout_width">50dp</dimen>
+    <dimen name="stock_price_layout_width">40dp</dimen>
+    <dimen name="stock_quantity_layout_width">40dp</dimen>
+    <dimen name="stock_change_layout_width">40dp</dimen>
     
 </resources>

@@ -15,8 +15,7 @@ import android.widget.TextView;
 import com.stocktracker.data.Quote;
 import com.stocktracker.log.Logger;
 
-public class DetailsStockFragment extends Fragment
-{
+public class DetailsStockFragment extends Fragment {
     public static final String TAG = DetailsStockFragment.class.getCanonicalName();
     public static final String KEY_QUOTE = "quote";
     public final static String KEY_ID = "id";
@@ -25,7 +24,7 @@ public class DetailsStockFragment extends Fragment
 
     private long id;
     private Quote quote;
-    
+
     private float marginLeft;
     private float marginTop;
     private float marginRight;
@@ -33,8 +32,7 @@ public class DetailsStockFragment extends Fragment
     private TableRow.LayoutParams dividertexTViewParams = null;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         this.quote = (Quote) getArguments().getParcelable(DetailsStockFragment.KEY_QUOTE);
         this.id = getArguments().getLong(DetailsStockFragment.KEY_ID);
 
@@ -42,15 +40,14 @@ public class DetailsStockFragment extends Fragment
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState)
-    {
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        
+
         marginLeft = getResources().getDimension(R.dimen.details_divider_margin_left);
         marginTop = getResources().getDimension(R.dimen.details_divider_margin_top);
         marginRight = getResources().getDimension(R.dimen.details_divider_margin_right);
         marginBottom = getResources().getDimension(R.dimen.details_divider_margin_bottom);
-        
+
         dividertexTViewParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, 1);
         dividertexTViewParams.weight = 1;
         dividertexTViewParams.setMargins((int) marginLeft, (int) marginTop, (int) marginRight, (int) marginBottom);
@@ -59,13 +56,11 @@ public class DetailsStockFragment extends Fragment
         detailsStockSymbol.setText(quote.getName() + " (" + quote.getSymbol() + ")");
 
         TableLayout table = (TableLayout) getView().findViewById(R.id.detailsTable);
-        if(Logger.isLoggingEnabled())
-        {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: table = '%s'", CLASS_NAME, "onActivityCreated", table);
         }
 
-        if(table != null)
-        {
+        if (table != null) {
             TableLayout.LayoutParams tableParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT,
                     TableLayout.LayoutParams.WRAP_CONTENT);
 
@@ -78,8 +73,7 @@ public class DetailsStockFragment extends Fragment
             SortedMap<String, String> map = getDetailsMap();
             final int mapSize = map.size();
             int count = 0;
-            for (String key : map.keySet())
-            {
+            for (String key : map.keySet()) {
                 TextView detailNameTextView = new TextView(getActivity());
                 detailNameTextView.setLayoutParams(rowParams);
                 detailNameTextView.setText(key);
@@ -96,18 +90,16 @@ public class DetailsStockFragment extends Fragment
 
                 table.addView(tableRow);
 
-                if(count+1 < mapSize)
-                {
+                if (count + 1 < mapSize) {
                     table.addView(createSeparator(tableParams));
                 }
-                
+
                 count++;
             }
         }
     }
 
-    private View createSeparator(TableLayout.LayoutParams tableRowParams)
-    {
+    private View createSeparator(TableLayout.LayoutParams tableRowParams) {
         TableRow tableRow = new TableRow(getActivity());
         tableRow.setLayoutParams(tableRowParams);
 
@@ -120,8 +112,7 @@ public class DetailsStockFragment extends Fragment
         return tableRow;
     }
 
-    private SortedMap<String, String> getDetailsMap()
-    {
+    private SortedMap<String, String> getDetailsMap() {
         SortedMap<String, String> map = new TreeMap<String, String>();
         map.put("Average Daily Volume", quote.getAverageDailyVolume());
         map.put("Change", quote.getChange());

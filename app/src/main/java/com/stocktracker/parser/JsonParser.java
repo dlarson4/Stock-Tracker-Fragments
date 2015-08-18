@@ -18,58 +18,46 @@ import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.log.Logger;
 
-public class JsonParser
-{
+public class JsonParser {
     private static final String CLASS_NAME = JsonParser.class.getSimpleName();
-    
-    private static final Class<?>[] SINGLE_STRING_PARAM_TYPE = { String.class };
 
-    private static final String[] QUOTE_FIELDS = { "Symbol", "AverageDailyVolume", "Change", "DaysLow", "DaysHigh", "YearLow", "YearHigh", "MarketCapitalization",
-            "LastTradePriceOnly", "DaysRange", "Name", "Volume", "StockExchange" };
-    
+    private static final Class<?>[] SINGLE_STRING_PARAM_TYPE = {String.class};
+
+    private static final String[] QUOTE_FIELDS = {"Symbol", "AverageDailyVolume", "Change", "DaysLow", "DaysHigh", "YearLow", "YearHigh", "MarketCapitalization",
+            "LastTradePriceOnly", "DaysRange", "Name", "Volume", "StockExchange"};
+
     private static final String YQL_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ";
 
-    private JsonParser()
-    {
+    private JsonParser() {
     }
 
     @SuppressLint("SimpleDateFormat")
-    public static QuoteResponse createResponse(JSONObject json) throws JSONException
-    {
-        if(Logger.isLoggingEnabled())
-        {
+    public static QuoteResponse createResponse(JSONObject json) throws JSONException {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: Converting JSON to QuoteResponse.  JSON='%s'.", CLASS_NAME, "createResponse", json);
         }
-        
-        if(json == null)
-        {
+
+        if (json == null) {
             return null;
         }
 
         QuoteResponse response = new QuoteResponse();
         JSONObject queryObj = json.getJSONObject("query");
-        if(queryObj != null)
-        {
+        if (queryObj != null) {
             response.setCount(queryObj.getInt("count"));
             response.setLang(queryObj.getString("lang"));
             response.setCreated(parseCreatedDate(queryObj.getString("created")));
 
             JSONObject resultsObj = queryObj.getJSONObject("results");
-            if(resultsObj != null)
-            {
+            if (resultsObj != null) {
                 JSONArray quoteArr = getQuoteArray(resultsObj);
-                if(quoteArr != null)
-                {
+                if (quoteArr != null) {
                     List<Quote> quotes = new ArrayList<Quote>();
-                    for(int i = 0; i < quoteArr.length(); i++)
-                    {
-                        try
-                        {
+                    for (int i = 0; i < quoteArr.length(); i++) {
+                        try {
                             Quote quote = createQuote(quoteArr.getJSONObject(i));
                             quotes.add(quote);
-                        }
-                        catch(Throwable t)
-                        {
+                        } catch (Throwable t) {
                             Logger.error("%s.%s: Error parsing Quote object from JSON '%s'", CLASS_NAME, "createResponse", json);
                         }
                     }
@@ -78,109 +66,76 @@ public class JsonParser
             }
         }
 
-        if(Logger.isLoggingEnabled())
-        {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: Returning response '%s'", CLASS_NAME, "createResponse", response);
         }
 
         return response;
     }
 
-    private static JSONArray getQuoteArray(JSONObject json) throws JSONException
-    {
-        if(json.has("quote"))
-        {
+    private static JSONArray getQuoteArray(JSONObject json) throws JSONException {
+        if (json.has("quote")) {
             Object quote = json.get("quote");
-            if(quote instanceof JSONObject)
-            {
+            if (quote instanceof JSONObject) {
                 JSONArray arr = new JSONArray();
-                arr.put((JSONObject)quote);
+                arr.put((JSONObject) quote);
                 return arr;
-            }
-            else if(quote instanceof JSONArray)
-            {
-                return (JSONArray)quote;
+            } else if (quote instanceof JSONArray) {
+                return (JSONArray) quote;
             }
         }
         return null;
     }
 
-    private static Date parseCreatedDate(String json)
-    {
-        try
-        {
+    private static Date parseCreatedDate(String json) {
+        try {
             SimpleDateFormat format = new SimpleDateFormat(YQL_DATE_FORMAT, Locale.getDefault());
             Date date = format.parse(json.replaceAll("Z$", "+0000"));
             return date;
-        }
-        catch(ParseException e)
-        {
+        } catch (ParseException e) {
             Logger.debug("%s.%s: Error parsing created date '%s'", CLASS_NAME, "parseCreatedDate", json);
         }
         return null;
     }
 
-    private static Quote createQuote(final JSONObject json)
-    {
+    private static Quote createQuote(final JSONObject json) {
         Quote quote = new Quote();
 
-        for(String field : QUOTE_FIELDS)
-        {
-            if(json.has(field) && !json.isNull(field))
-            {
+        for (String field : QUOTE_FIELDS) {
+            if (json.has(field) && !json.isNull(field)) {
                 final String methodName = "set" + field;
                 java.lang.reflect.Method method = null;
-                try
-                {
-                    if(Logger.isLoggingEnabled())
-                    {
+                try {
+                    if (Logger.isLoggingEnabled()) {
                         Logger.debug("%s.%s: Attempting to access method '%s'", CLASS_NAME, "parseCreatedDate", methodName);
                     }
-                    
+
                     method = quote.getClass().getMethod(methodName, SINGLE_STRING_PARAM_TYPE);
-                }
-                catch(SecurityException e)
-                {
+                } catch (SecurityException e) {
                     Logger.error(e, "%s.%s: Error accessing method '%s' on Quote object", CLASS_NAME, "createQuote", field);
-                }
-                catch(NoSuchMethodException e)
-                {
+                } catch (NoSuchMethodException e) {
                     Logger.error(e, "%s.%s: Error accessing method '%s' on Quote object", CLASS_NAME, "createQuote", field);
                 }
 
-                try
-                {
-                    if(method == null)
-                    {
-                        if(Logger.isLoggingEnabled())
-                        {
+                try {
+                    if (method == null) {
+                        if (Logger.isLoggingEnabled()) {
                             Logger.debug("%s.%s: Unable to access method '%s'", CLASS_NAME, "createQuote", methodName);
                         }
-                    }
-                    else
-                    {
+                    } else {
                         String value = json.getString(field);
-                        if(Logger.isLoggingEnabled())
-                        {
+                        if (Logger.isLoggingEnabled()) {
                             Logger.debug("%s.%s: Invoking method '%s' with value '%s'", CLASS_NAME, "createQuote", methodName, value);
                         }
                         method.invoke(quote, value);
                     }
-                }
-                catch(IllegalArgumentException e)
-                {
+                } catch (IllegalArgumentException e) {
                     Logger.error(e, "%s.%s: Error invoking method '%s' on Quote object", CLASS_NAME, "createQuote", field);
-                }
-                catch(IllegalAccessException e)
-                {
+                } catch (IllegalAccessException e) {
                     Logger.error(e, "%s.%s: Error invoking method '%s' on Quote object", CLASS_NAME, "createQuote", field);
-                }
-                catch(InvocationTargetException e)
-                {
+                } catch (InvocationTargetException e) {
                     Logger.error(e, "%s.%s: Error invoking method '%s' on Quote object", CLASS_NAME, "createQuote", field);
-                }
-                catch(JSONException e)
-                {
+                } catch (JSONException e) {
                     Logger.error(e, "%s.%s: Error invoking method '%s' on Quote object", CLASS_NAME, "createQuote", field);
                 }
             }
@@ -200,8 +155,7 @@ public class JsonParser
 //        quote.setVolume(json.getString("Volume"));
 //        quote.setStockExchange(json.getString("StockExchange"));
 
-        if(Logger.isLoggingEnabled())
-        {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: Final quote object: '%s'", CLASS_NAME, "createQuote", quote);
         }
         return quote;

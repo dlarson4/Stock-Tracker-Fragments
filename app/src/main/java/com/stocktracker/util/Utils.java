@@ -4,8 +4,7 @@ import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.log.Logger;
 
-public class Utils
-{
+public class Utils {
     private static final String CLASS_NAME = Utils.class.getSimpleName();
 
 //    public static boolean stockExists(QuoteResponse response)
@@ -19,32 +18,24 @@ public class Utils
 //        return !quote.getLastTradePriceOnly().equals("null") && !quote.getStockExchange().equals("null");
 //    }
 
-    public static boolean isValidStock(QuoteResponse response)
-    {
-        if(response == null || response.getQuotes() == null || response.getQuotes().isEmpty())
-        {
+    public static boolean isValidStock(QuoteResponse response) {
+        if (response == null || response.getQuotes() == null || response.getQuotes().isEmpty()) {
             return false;
         }
 
         Quote q = response.getQuotes().get(0);
         return q != null && q.getLastTradePriceOnly() != null && q.getStockExchange() != null;
     }
-    
-    public static boolean isValidQuantity(String quantityStr)
-    {
-        if(quantityStr == null || quantityStr.trim().length() < 1)
-        {
+
+    public static boolean isValidQuantity(String quantityStr) {
+        if (quantityStr == null || quantityStr.trim().length() < 1) {
             return false;
         }
-        try
-        {
+        try {
             double q = Double.parseDouble(quantityStr);
             return q > 0;
-        }
-        catch(NumberFormatException e)
-        {
-            if(Logger.isLoggingEnabled())
-            {
+        } catch (NumberFormatException e) {
+            if (Logger.isLoggingEnabled()) {
                 Logger.debug("%s.%s: Error parsing quantity '%s' to double.", CLASS_NAME, "isValidQuantity", quantityStr);
             }
             return false;

@@ -17,10 +17,9 @@ import com.stocktracker.db.StockDatabaseHelper;
 import com.stocktracker.db.StockTable;
 import com.stocktracker.log.Logger;
 
-public class StockContentProvider extends ContentProvider
-{
+public class StockContentProvider extends ContentProvider {
     private final static String CLASS_NAME = StockContentProvider.class.getSimpleName();
-    
+
     private StockDatabaseHelper database;
 
     // helper constants for use with the UriMatcher
@@ -28,42 +27,36 @@ public class StockContentProvider extends ContentProvider
     private static final int STOCK_ID = 20;
 
     public static final UriMatcher URI_MATCHER = new UriMatcher(UriMatcher.NO_MATCH);
-    
-    static
-    {
+
+    static {
         URI_MATCHER.addURI(AUTHORITY, BASE_PATH, STOCKS);
         URI_MATCHER.addURI(AUTHORITY, BASE_PATH + "/#", STOCK_ID);
     }
 
     @Override
-    public boolean onCreate()
-    {
+    public boolean onCreate() {
         database = new StockDatabaseHelper(getContext());
         return false;
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
-    {
-        if(Logger.isLoggingEnabled())
-        {
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: uri = '%s'", CLASS_NAME, "query", uri);
         }
-        
+
         checkColumns(projection);
-        
+
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(StockTable.STOCK_TABLE_NAME);
 
         int uriType = URI_MATCHER.match(uri);
-        
-        if(Logger.isLoggingEnabled())
-        {
+
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: uriType = '%s'", CLASS_NAME, "query", uriType);
         }
-        
-        switch (uriType)
-        {
+
+        switch (uriType) {
             case STOCKS:
                 break;
             case STOCK_ID:
@@ -75,35 +68,29 @@ public class StockContentProvider extends ContentProvider
 
         SQLiteDatabase db = database.getWritableDatabase();
         Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
-        
+
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
         return cursor;
     }
 
-    private void checkColumns(String[] projection)
-    {
-        if(projection != null)
-        {
+    private void checkColumns(String[] projection) {
+        if (projection != null) {
             java.util.HashSet<String> requestedColumns = new java.util.HashSet<String>(java.util.Arrays.asList(projection));
             java.util.HashSet<String> availableColumns = new java.util.HashSet<String>(java.util.Arrays.asList(StockTable.ALL_COLUMNS));
-            if(!availableColumns.containsAll(requestedColumns))
-            {
+            if (!availableColumns.containsAll(requestedColumns)) {
                 throw new IllegalArgumentException("Unknown columns in projection");
             }
         }
     }
 
     @Override
-    public String getType(Uri uri)
-    {
-        if(Logger.isLoggingEnabled())
-        {
+    public String getType(Uri uri) {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: uri = '%s'", CLASS_NAME, "getType", uri);
         }
-        
-        switch (URI_MATCHER.match(uri))
-        {
+
+        switch (URI_MATCHER.match(uri)) {
             case STOCK_ID:
                 return StockContract.CONTENT_ITEM_TYPE;
             case STOCKS:
@@ -114,19 +101,16 @@ public class StockContentProvider extends ContentProvider
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values)
-    {
-        if(Logger.isLoggingEnabled())
-        {
+    public Uri insert(Uri uri, ContentValues values) {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: uri = '%s'", CLASS_NAME, "insert", uri);
         }
-        
+
         int uriType = URI_MATCHER.match(uri);
         long id = 0;
         SQLiteDatabase db = database.getWritableDatabase();
 
-        switch (uriType)
-        {
+        switch (uriType) {
             case STOCKS:
                 id = db.insert(StockTable.STOCK_TABLE_NAME, null, values);
                 break;
@@ -134,44 +118,35 @@ public class StockContentProvider extends ContentProvider
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
         getContext().getContentResolver().notifyChange(uri, null);
-        
+
         return Uri.parse(CONTENT_URI.toString() + "/" + id);
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs)
-    {
-        if(Logger.isLoggingEnabled())
-        {
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: uri = '%s'", CLASS_NAME, "delete", uri);
         }
-        
+
         int uriType = URI_MATCHER.match(uri);
         int rowsDeleted = 0;
         SQLiteDatabase db = database.getWritableDatabase();
 
-        switch (uriType)
-        {
-            case STOCKS:
-            {
+        switch (uriType) {
+            case STOCKS: {
                 rowsDeleted = db.delete(StockTable.STOCK_TABLE_NAME, selection, selectionArgs);
                 break;
             }
-            case STOCK_ID:
-            {
+            case STOCK_ID: {
                 String id = uri.getLastPathSegment();
-                if(TextUtils.isEmpty(selection))
-                {
+                if (TextUtils.isEmpty(selection)) {
                     rowsDeleted = db.delete(StockTable.STOCK_TABLE_NAME, StockTable.COLUMN_ID + "=" + id, null);
-                }
-                else
-                {
+                } else {
                     rowsDeleted = db.delete(StockTable.STOCK_TABLE_NAME, StockTable.COLUMN_ID + "=" + id + " and " + selection, selectionArgs);
                 }
                 break;
             }
-            default:
-            {
+            default: {
                 throw new IllegalArgumentException("Unknown URI: " + uri);
             }
         }
@@ -180,38 +155,29 @@ public class StockContentProvider extends ContentProvider
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs)
-    {
-        if(Logger.isLoggingEnabled())
-        {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        if (Logger.isLoggingEnabled()) {
             Logger.debug("%s.%s: uri = '%s'", CLASS_NAME, "update", uri);
         }
-        
+
         int uriType = URI_MATCHER.match(uri);
         SQLiteDatabase sqlDB = database.getWritableDatabase();
         int rowsUpdated = 0;
-        switch (uriType)
-        {
-            case STOCKS:
-            {
+        switch (uriType) {
+            case STOCKS: {
                 rowsUpdated = sqlDB.update(StockTable.STOCK_TABLE_NAME, values, selection, selectionArgs);
                 break;
             }
-            case STOCK_ID:
-            {
+            case STOCK_ID: {
                 String id = uri.getLastPathSegment();
-                if(TextUtils.isEmpty(selection))
-                {
+                if (TextUtils.isEmpty(selection)) {
                     rowsUpdated = sqlDB.update(StockTable.STOCK_TABLE_NAME, values, StockTable.COLUMN_ID + "=" + id, null);
-                }
-                else
-                {
+                } else {
                     rowsUpdated = sqlDB.update(StockTable.STOCK_TABLE_NAME, values, StockTable.COLUMN_ID + "=" + id + " and " + selection, selectionArgs);
                 }
                 break;
             }
-            default:
-            {
+            default: {
                 throw new IllegalArgumentException("Unknown URI: " + uri);
             }
         }
