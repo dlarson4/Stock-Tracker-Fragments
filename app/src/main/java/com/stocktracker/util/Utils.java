@@ -1,22 +1,13 @@
 package com.stocktracker.util;
 
+import android.util.Log;
+
 import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
-import com.stocktracker.log.Logger;
+import static com.stocktracker.BuildConfig.DEBUG;
 
 public class Utils {
-    private static final String CLASS_NAME = Utils.class.getSimpleName();
-
-//    public static boolean stockExists(QuoteResponse response)
-//    {
-//        if(response == null || response.getQuotes() == null || response.getQuotes().isEmpty())
-//        {
-//            return false;
-//        }
-//
-//        Quote quote = response.getQuotes().get(0);
-//        return !quote.getLastTradePriceOnly().equals("null") && !quote.getStockExchange().equals("null");
-//    }
+    private static final String TAG = Utils.class.getSimpleName();
 
     public static boolean isValidStock(QuoteResponse response) {
         if (response == null || response.getQuotes() == null || response.getQuotes().isEmpty()) {
@@ -35,9 +26,7 @@ public class Utils {
             double q = Double.parseDouble(quantityStr);
             return q > 0;
         } catch (NumberFormatException e) {
-            if (Logger.isLoggingEnabled()) {
-                Logger.debug("%s.%s: Error parsing quantity '%s' to double.", CLASS_NAME, "isValidQuantity", quantityStr);
-            }
+            if(DEBUG) Log.d(TAG, "Error parsing quantity " + quantityStr + " to double.");
             return false;
         }
     }

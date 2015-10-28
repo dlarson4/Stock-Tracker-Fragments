@@ -1,8 +1,5 @@
 package com.stocktracker;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.IntentService;
 import android.content.Context;
@@ -13,14 +10,21 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.http.HttpRequestWrapper;
 import com.stocktracker.http.HttpTaskResponse;
-import com.stocktracker.log.Logger;
 import com.stocktracker.parser.QuoteResponseStrategy;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import static com.stocktracker.BuildConfig.DEBUG;
+
 public class DownloadIntentService extends IntentService {
+    private final static String TAG = DownloadIntentService.class.getSimpleName();
+
     private static final String WHAT = "WHAT";
     private static final String EXTRAS = "extras";
     public static final String MESSENGER = "MESSENGER";
@@ -36,9 +40,7 @@ public class DownloadIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         final String url = intent.getData().toString();
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Download URI = '%s'.", CLASS_NAME, "onHandleIntent", url);
-        }
+        if (DEBUG) Log.d(TAG, "Download URI = " + url);
 
         if (url == null) {
             return;
@@ -51,10 +53,7 @@ public class DownloadIntentService extends IntentService {
         logResponse(response);
 
         if (response.isError()) {
-            if (Logger.isLoggingEnabled()) {
-                Logger.debug("%s.%s: Server did not respond.", CLASS_NAME, "onPostExecute");
-            }
-
+            if (DEBUG) Log.d(TAG, "Server did not respond.");
             sendMessage(intent, null);
         } else {
             parseResponse(response, intent);
@@ -71,7 +70,7 @@ public class DownloadIntentService extends IntentService {
             // Send the message/response back to the handler
             messenger.send(message);
         } catch (RemoteException e) {
-            Logger.error(e, "%s.%s: Error sending Messenger response from DownloadIntentService.", CLASS_NAME, "sendMessage");
+            if (DEBUG) Log.d(TAG, "Error sending Messenger response from DownloadIntentService.");
         }
     }
 
@@ -101,11 +100,10 @@ public class DownloadIntentService extends IntentService {
             QuoteResponseStrategy parser = new QuoteResponseStrategy();
             quoteResponse = parser.parse(json);
 
-            if (Logger.isLoggingEnabled()) {
-                Logger.debug("%s.%s: Parsed JSON = '%s'.", CLASS_NAME, "parseResponse", String.valueOf(quoteResponse));
-            }
+            if (DEBUG) Log.d(TAG, "Parsed JSON = " + String.valueOf(quoteResponse));
+
         } catch (JSONException e) {
-            Logger.error(e, "%s.%s: Failed to parse JSON from result.", CLASS_NAME, "parseResponse");
+            if (DEBUG) Log.d(TAG, "%s.%s: Failed to parse JSON from result.");
         }
 
         sendMessage(intent, quoteResponse);
@@ -147,21 +145,20 @@ public class DownloadIntentService extends IntentService {
     }
 
     private void logResponse(HttpTaskResponse response) {
-        if (Logger.isLoggingEnabled() && response != null && response.getData() != null && response.getData().length() < MAX_DEBUG_CONTENT_LENGTH) {
-            Logger.debug("%s.%s: HTTP response = '%s'.", CLASS_NAME, "doInBackground", response);
-        }
+        if (DEBUG) Log.d(TAG, "HTTP response = " + response);
+
     }
 
     private void log(JSONObject json) {
-        if (Logger.isLoggingEnabled() && json != null) {
+        if (DEBUG) {
             if (json.length() < MAX_DEBUG_CONTENT_LENGTH) {
                 try {
-                    Logger.debug("%s.%s: Parsed JSON: %s", CLASS_NAME, "parseResponse", json.toString(4));
+                    if (DEBUG) Log.d(TAG, "Parsed JSON: " + json.toString(4));
                 } catch (JSONException e) {
-                    Logger.error(e, "%s.%s: Failed to parse JSON from result.", CLASS_NAME, "logParsedJSON");
+                    if (DEBUG) Log.d(TAG, "Failed to parse JSON from result.");
                 }
             } else {
-                Logger.debug("%s.%s: Parsed JSON is too big to display (length = %d).", CLASS_NAME, "logParsedJSON", json.length());
+                if (DEBUG) Log.d(TAG, "Parsed JSON is too big to display (length = " + json.length() + ")");
             }
         }
     }

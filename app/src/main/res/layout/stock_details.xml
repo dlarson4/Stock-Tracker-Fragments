@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/details_margin_top_bottom"
+                android:paddingLeft="@dimen/details_margin_left_right"
+                android:paddingRight="@dimen/details_margin_left_right"
+                android:paddingTop="@dimen/details_margin_top_bottom"
+                android:background="#cbcbcb">
+
+    <TextView
+        android:id="@+id/quantityLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quantity" />
+
+    <TextView
+        android:id="@+id/quantity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="12.34"
+        android:layout_toRightOf="@id/quantityLabel"
+        android:layout_alignParentRight="true"
+        android:gravity="center_vertical|right"/>
+
+
+    <TextView
+        android:id="@+id/dayHighLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Day's High"
+        android:layout_below="@id/quantityLabel"
+        android:paddingTop="@dimen/details_margin_top_bottom"/>
+
+    <TextView
+        android:id="@+id/dayHigh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="43.34"
+        android:layout_below="@id/quantity"
+        android:layout_alignParentRight="true"
+        android:gravity="center_vertical|right"
+        android:paddingTop="@dimen/details_margin_top_bottom"/>
+
+
+    <TextView
+        android:id="@+id/dayLowLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Day's Low"
+        android:layout_below="@id/dayHighLabel"
+        android:paddingTop="@dimen/details_margin_top_bottom"/>
+
+    <TextView
+        android:id="@+id/dayLow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="21.65"
+        android:layout_below="@id/dayHigh"
+        android:layout_alignParentRight="true"
+        android:gravity="center_vertical|right"
+        android:paddingTop="@dimen/details_margin_top_bottom"/>
+
+
+    <TextView
+        android:id="@+id/yearHighLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Year's High"
+        android:layout_below="@id/dayLowLabel"
+        android:paddingTop="@dimen/details_margin_top_bottom"/>
+
+    <TextView
+        android:id="@+id/yearHigh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="13.65"
+        android:layout_below="@id/dayLow"
+        android:layout_alignParentRight="true"
+        android:gravity="center_vertical|right"
+        android:paddingTop="@dimen/details_margin_top_bottom"/>
+
+
+    <TextView
+        android:id="@+id/yearLowLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Year's Low"
+        android:layout_below="@id/yearHighLabel"
+        android:paddingTop="@dimen/details_margin_top_bottom"/>
+
+    <TextView
+        android:id="@+id/yearLow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="76.89"
+        android:layout_below="@id/yearHigh"
+        android:layout_alignParentRight="true"
+        android:gravity="center_vertical|right"
+        android:paddingTop="@dimen/details_margin_top_bottom"/>
+
+
+</RelativeLayout>

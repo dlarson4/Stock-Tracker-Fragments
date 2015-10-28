@@ -1,23 +1,26 @@
 package com.stocktracker;
 
-import java.util.ArrayList;
-import java.util.List;
 
-import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.util.Log;
 
 import com.stocktracker.contentprovider.StockContract;
 import com.stocktracker.data.Stock;
 import com.stocktracker.db.StockTable;
-import com.stocktracker.log.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.stocktracker.BuildConfig.DEBUG;
 
 public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor> {
-    private static final Object CLASS_NAME = StockLoader.class.getSimpleName();
+    private static final String TAG = StockLoader.class.getSimpleName();
 
     private Context context;
     private StockLoaderCallback callback;
@@ -32,10 +35,8 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: ", CLASS_NAME, "onCreateLoader");
-        }
+    public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        if (DEBUG) Log.d(TAG, "onCreateLoader");
 
         final Uri uri = StockContract.CONTENT_URI;
         final String[] projection = StockTable.ALL_COLUMNS;
@@ -43,20 +44,28 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor> {
         return new CursorLoader(context, uri, projection, null, null, StockTable.COLUMN_STOCK);
     }
 
+    //    @Override
+//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+//        if (DEBUG) Log.d(TAG, "onCreateLoader");
+//
+//
+//        final Uri uri = StockContract.CONTENT_URI;
+//        final String[] projection = StockTable.ALL_COLUMNS;
+//
+//        return new CursorLoader(context, uri, projection, null, null, StockTable.COLUMN_STOCK);
+//    }
+
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: ", CLASS_NAME, "onLoadFinished");
-        }
+    public void onLoadFinished(android.support.v4.content.Loader<Cursor> loader, Cursor cursor) {
+        if (DEBUG) Log.d(TAG, "onLoadFinished");
 
         List<Stock> stocks = new ArrayList<Stock>();
 
         if (cursor != null) {
             if (cursor.moveToFirst()) {
                 do {
-                    if (Logger.isLoggingEnabled()) {
-                        Logger.debug("%s.%s: Creating stock", CLASS_NAME, "onLoadFinished");
-                    }
+                    if (DEBUG) Log.d(TAG, "Creating stock");
+
                     stocks.add(createStock(cursor));
                 } while (cursor.moveToNext());
             }
@@ -68,11 +77,36 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: ", CLASS_NAME, "onLoaderReset");
-        }
+    public void onLoaderReset(android.support.v4.content.Loader<Cursor> loader) {
+        if (DEBUG) Log.d(TAG, "onLoaderReset");
     }
+
+//    @Override
+//    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+//        if (DEBUG) Log.d(TAG, "onLoadFinished");
+//
+//
+//        List<Stock> stocks = new ArrayList<Stock>();
+//
+//        if (cursor != null) {
+//            if (cursor.moveToFirst()) {
+//                do {
+//                    if (DEBUG) Log.d(TAG, "Creating stock");
+//
+//                    stocks.add(createStock(cursor));
+//                } while (cursor.moveToNext());
+//            }
+//        }
+//
+//        if (callback != null) {
+//            callback.onStocksLoadedFromDatabase(stocks);
+//        }
+//    }
+
+//    @Override
+//    public void onLoaderReset(Loader<Cursor> loader) {
+//        if (DEBUG) Log.d(TAG, "onLoaderReset");
+//    }
 
     private Stock createStock(Cursor cursor) {
         long id = cursor.getLong(0);

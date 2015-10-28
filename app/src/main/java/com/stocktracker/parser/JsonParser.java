@@ -1,5 +1,15 @@
 package com.stocktracker.parser;
 
+import android.annotation.SuppressLint;
+import android.util.Log;
+
+import com.stocktracker.data.Quote;
+import com.stocktracker.data.QuoteResponse;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -8,18 +18,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.annotation.SuppressLint;
-
-import com.stocktracker.data.Quote;
-import com.stocktracker.data.QuoteResponse;
-import com.stocktracker.log.Logger;
+import static com.stocktracker.BuildConfig.DEBUG;
 
 public class JsonParser {
-    private static final String CLASS_NAME = JsonParser.class.getSimpleName();
+    private final static String TAG = JsonParser.class.getSimpleName();
 
     private static final Class<?>[] SINGLE_STRING_PARAM_TYPE = {String.class};
 
@@ -33,9 +35,7 @@ public class JsonParser {
 
     @SuppressLint("SimpleDateFormat")
     public static QuoteResponse createResponse(JSONObject json) throws JSONException {
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Converting JSON to QuoteResponse.  JSON='%s'.", CLASS_NAME, "createResponse", json);
-        }
+        if (DEBUG) Log.d(TAG, "Converting JSON to QuoteResponse.  JSON=" + json);
 
         if (json == null) {
             return null;
@@ -58,7 +58,7 @@ public class JsonParser {
                             Quote quote = createQuote(quoteArr.getJSONObject(i));
                             quotes.add(quote);
                         } catch (Throwable t) {
-                            Logger.error("%s.%s: Error parsing Quote object from JSON '%s'", CLASS_NAME, "createResponse", json);
+                            if (DEBUG) Log.d(TAG, "Error parsing Quote object from JSON " + json);
                         }
                     }
                     response.setQuotes(quotes);
@@ -66,10 +66,7 @@ public class JsonParser {
             }
         }
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Returning response '%s'", CLASS_NAME, "createResponse", response);
-        }
-
+        if (DEBUG) Log.d(TAG, "Returning response " + response);
         return response;
     }
 
@@ -93,7 +90,7 @@ public class JsonParser {
             Date date = format.parse(json.replaceAll("Z$", "+0000"));
             return date;
         } catch (ParseException e) {
-            Logger.debug("%s.%s: Error parsing created date '%s'", CLASS_NAME, "parseCreatedDate", json);
+            if (DEBUG) Log.d(TAG, "Error parsing created date " + json);
         }
         return null;
     }
@@ -106,37 +103,26 @@ public class JsonParser {
                 final String methodName = "set" + field;
                 java.lang.reflect.Method method = null;
                 try {
-                    if (Logger.isLoggingEnabled()) {
-                        Logger.debug("%s.%s: Attempting to access method '%s'", CLASS_NAME, "parseCreatedDate", methodName);
-                    }
+                    if (DEBUG) Log.d(TAG, "Attempting to access method " + methodName);
+
 
                     method = quote.getClass().getMethod(methodName, SINGLE_STRING_PARAM_TYPE);
-                } catch (SecurityException e) {
-                    Logger.error(e, "%s.%s: Error accessing method '%s' on Quote object", CLASS_NAME, "createQuote", field);
-                } catch (NoSuchMethodException e) {
-                    Logger.error(e, "%s.%s: Error accessing method '%s' on Quote object", CLASS_NAME, "createQuote", field);
+                } catch (SecurityException | NoSuchMethodException e) {
+                    if (DEBUG) Log.d(TAG, "Error accessing method " + field + " on Quote object");
                 }
 
                 try {
                     if (method == null) {
-                        if (Logger.isLoggingEnabled()) {
-                            Logger.debug("%s.%s: Unable to access method '%s'", CLASS_NAME, "createQuote", methodName);
-                        }
+                        if (DEBUG) Log.d(TAG, "Unable to access method " + methodName);
+
                     } else {
                         String value = json.getString(field);
-                        if (Logger.isLoggingEnabled()) {
-                            Logger.debug("%s.%s: Invoking method '%s' with value '%s'", CLASS_NAME, "createQuote", methodName, value);
-                        }
+                        if (DEBUG) Log.d(TAG, "Invoking method " + methodName + "  with value " + value);
+
                         method.invoke(quote, value);
                     }
-                } catch (IllegalArgumentException e) {
-                    Logger.error(e, "%s.%s: Error invoking method '%s' on Quote object", CLASS_NAME, "createQuote", field);
-                } catch (IllegalAccessException e) {
-                    Logger.error(e, "%s.%s: Error invoking method '%s' on Quote object", CLASS_NAME, "createQuote", field);
-                } catch (InvocationTargetException e) {
-                    Logger.error(e, "%s.%s: Error invoking method '%s' on Quote object", CLASS_NAME, "createQuote", field);
-                } catch (JSONException e) {
-                    Logger.error(e, "%s.%s: Error invoking method '%s' on Quote object", CLASS_NAME, "createQuote", field);
+                } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException | JSONException e) {
+                    if (DEBUG) Log.d(TAG, "Error invoking method " + field + " on Quote object");
                 }
             }
         }
@@ -155,9 +141,7 @@ public class JsonParser {
 //        quote.setVolume(json.getString("Volume"));
 //        quote.setStockExchange(json.getString("StockExchange"));
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Final quote object: '%s'", CLASS_NAME, "createQuote", quote);
-        }
+        if (DEBUG) Log.d(TAG, "Final quote object: " + quote);
         return quote;
     }
 

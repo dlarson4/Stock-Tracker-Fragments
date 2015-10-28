@@ -1,360 +1,150 @@
 package com.stocktracker;
 
-import java.lang.ref.WeakReference;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
-import android.app.Activity;
-import android.app.AlertDialog.Builder;
-import android.app.ListFragment;
+import android.app.AlertDialog;
 import android.content.Intent;
-import android.graphics.drawable.AnimationDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.ActionMode;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.RelativeLayout;
 
+import com.bignerdranch.expandablerecyclerview.Model.ParentObject;
 import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.data.Stock;
-//import com.stocktracker.db.StockContentProviderFacade;
-import com.stocktracker.log.Logger;
-import com.stocktracker.stocklist.DividerListItem;
-import com.stocktracker.stocklist.HeaderListItem;
-import com.stocktracker.stocklist.MarketChangeListItem;
-import com.stocktracker.stocklist.MarketTotalListItem;
-import com.stocktracker.stocklist.QuoteAdapter;
-import com.stocktracker.stocklist.QuoteListItem;
-import com.stocktracker.stocklist.StockTrackerListItem;
-import com.stocktracker.util.FormatUtils;
+import com.stocktracker.util.UrlBuilder;
 
-public class StockListFragment extends ListFragment implements ActionBarCallback.ActionBarListener, StockLoader.StockLoaderCallback {
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static com.stocktracker.BuildConfig.DEBUG;
+
+public class StockListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, StockLoader.StockLoaderCallback {
+
+    static final String TAG = StockListFragment.class.getSimpleName();
     private static final int LOADER_ID = 0;
-    private static final Object CLASS_NAME = StockListFragment.class.getSimpleName();
 
     private static final String FRAGMENT_LIST_KEY = "fragmentListKey";
     private static final String STOCK_LIST_KEY = "stockListKey";
 
-    public static final String TAG = StockListFragment.class.getCanonicalName();
-
-    // callback to Activity
-    private StockListListener mCallback;
-
-    // stock quote data loaded from web service
-    private List<Quote> quoteList;
-
-    private ActionMode mActionMode;
-    private ActionBarCallback mActionModeCallback = new ActionBarCallback(this);
-    private int selectedIndex = -1;
-
-    // implementation of Handler, used to load stock quote data from web service
-    private Handler downloadHandler = null;
+    private SwipeRefreshLayout mRefreshLayout;
+    private RecyclerView mRecyclerView;
 
     // implementation of LoaderManager.LoaderCallbacks, used to load stocks from the database
     private StockLoader loaderCallback = null;
 
+    // implementation of Handler, used to load stock quote data from web service
+    private Handler downloadHandler = null;
+
     // list of stocks loaded from the database
     private List<Stock> stockList;
 
-    static interface StockListListener {
-        void editStock(Quote quote);
-
-        void deleteStock(String symbol, long id);
-
-        void viewStockDetails(Quote quote, long id);
-
-        void addClicked(View view);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        if (this.quoteList != null) {
-            if (Logger.isLoggingEnabled()) {
-                Logger.debug("%s.%s: Saving stock list", CLASS_NAME, "onSaveInstanceState");
-            }
-            outState.putParcelableArrayList(FRAGMENT_LIST_KEY, (ArrayList<Quote>) this.quoteList);
-            outState.putParcelableArrayList(STOCK_LIST_KEY, (ArrayList<Stock>) this.stockList);
-        }
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s:", CLASS_NAME, "onAttach");
-        }
-
-        try {
-            mCallback = (StockListListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement StockListListener");
-        }
-    }
+    // stock quote data loaded from web service and saved between configuration changes
+    private List<ParentObject> parentObjectList;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s:", CLASS_NAME, "onCreate");
-        }
+        if (DEBUG) Log.d(TAG, "onCreate");
+
+        parentObjectList = new ArrayList<>();
+
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                updateStockList();
+            }
+        });
 
         downloadHandler = new StockDownloadHandler(this);
-        loaderCallback = new StockLoader(this.getActivity(), this);
+        loaderCallback = new StockLoader(getActivity(), this);
     }
 
+    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s:", CLASS_NAME, "onCreateView");
-        }
 
-        if (savedInstanceState != null) {
-            this.quoteList = (List) savedInstanceState.getParcelableArrayList(FRAGMENT_LIST_KEY);
-            if (Logger.isLoggingEnabled()) {
-                Logger.debug("%s.%s: Restored quote list = '%s'", CLASS_NAME, "onCreateView", quoteList);
+        RelativeLayout relativeLayout = (RelativeLayout) inflater.inflate(R.layout.stock_fragment_list, container, false);
+        mRecyclerView = (RecyclerView) relativeLayout.findViewById(R.id.recyclerview);
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mRecyclerView.getContext()));
+        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
+
+        StockExpandableAdapter mStockExpandableAdapter = new StockExpandableAdapter(getActivity().getBaseContext(), parentObjectList);
+        mStockExpandableAdapter.setParentClickableViewAnimationDefaultDuration();
+        mStockExpandableAdapter.setParentAndIconExpandOnClick(true);
+        mRecyclerView.setAdapter(mStockExpandableAdapter);
+
+        mRefreshLayout = (SwipeRefreshLayout) relativeLayout.findViewById(R.id.swipe);
+        mRefreshLayout.setOnRefreshListener(this);
+        mRecyclerView.setLongClickable(true);
+        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                if (DEBUG) Log.d(TAG, "onItemClick, position = " + position);
+                if(view.isSelected()) {
+                    view.setSelected(false);
+                }
             }
 
-            this.stockList = (List) savedInstanceState.getParcelableArrayList(STOCK_LIST_KEY);
-            if (Logger.isLoggingEnabled()) {
-                Logger.debug("%s.%s: Restored stock list = '%s'", CLASS_NAME, "onCreateView", stockList);
+            @Override
+            public void onItemLongClick(View view, int position) {
+                if (DEBUG) Log.d(TAG, "onItemLongClick, position = " + position);
+                StockParentViewHolder viewHolder = (StockParentViewHolder)mRecyclerView.findViewHolderForLayoutPosition(position);
+                if(!viewHolder.isExpanded()) {
+                    view.setSelected(true);
+                }
             }
-        }
+        }));
 
-        return inflater.inflate(R.layout.stock_list_fragment, container, false);
+        return relativeLayout;
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s:", CLASS_NAME, "onActivityCreated");
-        }
-
-        getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (Logger.isLoggingEnabled()) {
-                    Logger.debug("%s.%s: onItemLongClick called, position = %d, id = %d", CLASS_NAME, "onItemLongClick", position, id);
-                }
-
-                StockTrackerListItem listItem = (StockTrackerListItem) getListView().getAdapter().getItem(position);
-
-                // Ignore the header, market change, market total, etc.
-                if (!(listItem instanceof QuoteListItem)) {
-                    return false;
-                }
-
-                StockListFragment.this.selectedIndex = position;
-
-                if (mActionMode != null) {
-                    return false;
-                }
-
-                mActionMode = StockListFragment.this.getActivity().startActionMode(mActionModeCallback);
-                view.setSelected(true);
-                return true;
-            }
-        });
-
-        ImageButton addButtom = (ImageButton) getView().findViewById(R.id.addButton);
-        ImageButton refreshButtom = (ImageButton) getView().findViewById(R.id.refreshButton);
-
-        addButtom.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mCallback.addClicked(view);
-            }
-        });
-
-        refreshButtom.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                StockListFragment.this.loadStockListFromDatabase();
-            }
-        });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s:", CLASS_NAME, "onResume");
-        }
-
-        // If we were able to retrieve quote info from the 'savedInstanceState', use that.  Otherwise reload
-        if (this.quoteList != null && !this.quoteList.isEmpty()) {
-            updateStockListDisplay(quoteList);
-        } else {
-            loadStockListFromDatabase();
-        }
+    public void onRefresh() {
+        if (DEBUG) Log.d(TAG, "onRefresh");
+        disableSwipe();
+        updateStockList();
     }
 
     /**
-     * Callback from StockLoader, called when the list of stocks has been retrieved from the database
+     * It shows the SwipeRefreshLayout progress
      */
-    @Override
-    public void onStocksLoadedFromDatabase(List<Stock> stocks) {
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Stock list loaded.", CLASS_NAME, "onStocksLoadedFromDatabase");
-        }
-        this.stockList = stocks;
-
-        retrieveStockQuotesFromWebService();
+    private void showSwipeProgress() {
+        mRefreshLayout.setRefreshing(true);
     }
 
     /**
-     * Start a loader to retrieve the stock list from the database.  (This eventually initiates the process of
-     * retrieving quote information from the web service and peforming a full refresh)
+     * It shows the SwipeRefreshLayout progress
      */
-    private void loadStockListFromDatabase() {
-        getLoaderManager().initLoader(LOADER_ID, null, loaderCallback);
+    private void hideSwipeProgress() {
+        mRefreshLayout.setRefreshing(false);
     }
 
     /**
-     * Update the ListView with the provided list of Quote objects
-     *
-     * @param quoteList
+     * Enables swipe gesture
      */
-    private void updateStockListDisplay(List<Quote> quoteList) {
-        if (quoteList == null || quoteList.isEmpty()) {
-            return;
-        }
-
-        this.quoteList = quoteList;
-
-        ListView stockListView = getListView();
-
-        // wrap each Quote object in a QuoteListItem so the adapter can operate
-        // against ListItem objects (one header and one or more quotes)
-        List<StockTrackerListItem> wrapQuoteList = wrapQuoteAsListItem(quoteList);
-
-        // add the header, divider, and market value (footer) rows rows
-        wrapQuoteList.add(0, new HeaderListItem());
-        wrapQuoteList.add(1, new DividerListItem());
-
-        final BigDecimal marketValue = FormatUtils.getTotalMarketValue(quoteList);
-        final BigDecimal previousMarketValue = FormatUtils.getPreviousMarketValue(quoteList);
-
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Market Total BigDecimal = '%s'.", CLASS_NAME, "updateStockList", marketValue);
-            Logger.debug("%s.%s: Previous Market Total BigDecimal = '%s'.", CLASS_NAME, "updateStockList", previousMarketValue);
-        }
-
-        wrapQuoteList.add(new MarketTotalListItem(marketValue));
-        wrapQuoteList.add(new MarketChangeListItem(marketValue, previousMarketValue));
-
-        final QuoteAdapter adapter = new QuoteAdapter(this.getActivity(), R.layout.stock_row_layout, wrapQuoteList);
-
-        stockListView.setAdapter(adapter);
-
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Done setting adapter", CLASS_NAME, "updateStockList", marketValue);
-        }
+    private void enableSwipe() {
+        mRefreshLayout.setEnabled(true);
     }
 
-    private List<StockTrackerListItem> wrapQuoteAsListItem(List<Quote> quotes) {
-        List<StockTrackerListItem> quoteItems = new ArrayList<StockTrackerListItem>();
-        if (quotes != null) {
-            for (Quote q : quotes) {
-                quoteItems.add(new QuoteListItem(q));
-            }
-        }
-        return quoteItems;
-    }
-
-    private void disableRefreshButton() {
-        if (this.isVisible()) {
-            ImageButton refreshButton = (ImageButton) getView().findViewById(R.id.refreshButton);
-            refreshButton.setImageResource(R.drawable.refresh_holo_light_disabled);
-            refreshButton.setEnabled(false);
-        }
-    }
-
-    private void enableRefreshButton() {
-        if (this.isVisible()) {
-            if (Logger.isLoggingEnabled()) {
-                Logger.debug("%s.%s: Enabling refresh button.", CLASS_NAME, "enableRefreshButton", "run");
-            }
-
-            ImageButton refreshButton = (ImageButton) getView().findViewById(R.id.refreshButton);
-            refreshButton.setImageResource(R.drawable.refresh_holo_light);
-            refreshButton.setEnabled(true);
-        }
-    }
-
-    // Action Bar callback
-    @Override
-    public void onDestroyActionMode(ActionMode mode) {
-        getListView().clearFocus();
-        mActionMode = null;
-    }
-
-    // Action Bar callback
-    @Override
-    public void onActionItemClicked(MenuItem item) {
-        if (!isVisible() || selectedIndex < 0) {
-            return;
-        }
-
-        StockTrackerListItem listItem = (StockTrackerListItem) getListView().getAdapter().getItem(this.selectedIndex);
-
-        // Ignore the header, market change, market total, etc.
-        if (!(listItem instanceof QuoteListItem)) {
-            mActionMode.finish();
-            return;
-        }
-
-        Quote quote = ((QuoteListItem) listItem).getQuote();
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Selected quote = '%s'", CLASS_NAME, "onActionItemClicked", quote);
-        }
-
-        getListView().clearFocus(); // to remove the highlighted background
-
-        switch (item.getItemId()) {
-            case R.id.action_edit: {
-                if (Logger.isLoggingEnabled()) {
-                    Logger.debug("%s.%s: Edit", CLASS_NAME, "onActionItemClicked");
-                }
-                mActionMode.finish();
-                mCallback.editStock(quote);
-                break;
-            }
-            case R.id.action_details: {
-                if (Logger.isLoggingEnabled()) {
-                    Logger.debug("%s.%s: Details", CLASS_NAME, "onActionItemClicked");
-                }
-                mActionMode.finish();
-                mCallback.viewStockDetails(quote, quote.getId());
-                break;
-            }
-            case R.id.action_delete: {
-                if (Logger.isLoggingEnabled()) {
-                    Logger.debug("%s.%s: Delete", CLASS_NAME, "onActionItemClicked");
-                }
-                mActionMode.finish();
-                mCallback.deleteStock(quote.getSymbol(), quote.getId());
-                break;
-            }
-        }
+    /**
+     * Disables swipe gesture. It prevents manual gestures but keeps the option tu show refreshing programmatically.
+     */
+    private void disableSwipe() {
+        mRefreshLayout.setEnabled(false);
     }
 
     /**
@@ -362,45 +152,50 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
      * one was added, deleted, or a quantity changed
      */
     void updateStockList() {
+        if (DEBUG) Log.d(TAG, "updateStockList");
         loadStockListFromDatabase();
     }
 
+    /**
+     * Start a loader to retrieve the stock list from the database.  (This eventually initiates the process of
+     * retrieving quote information from the web service and performing a full refresh)
+     */
+    private void loadStockListFromDatabase() {
+        if (DEBUG) Log.d(TAG, "loadStockListFromDatabase");
+        getLoaderManager().initLoader(LOADER_ID, null, loaderCallback);
+    }
+
     private void retrieveStockQuotesFromWebService() {
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: ", CLASS_NAME, "retrieveStockQuotesFromWebService");
-        }
+        if (DEBUG) Log.d(TAG, "retrieveStockQuotesFromWebService");
 
         final String url = UrlBuilder.buildAllStocksQuoteUrl(this.stockList);
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: buildAllStocksQuoteUrl() returned '%s'.", CLASS_NAME, "retrieveStockQuotesFromWebService", url);
-        }
+        if (DEBUG) Log.d(TAG, "buildAllStocksQuoteUrl() returned " + url);
+
         if (url != null) {
             // temporarily disable Refresh button
             if (this.isVisible()) {
-                disableRefreshButton();
+                disableSwipe();
             }
 
-            displayProgressDialog();
+            showSwipeProgress();
 
             Intent intent = DownloadIntentService.createIntent(this.getActivity(), Uri.parse(url), downloadHandler, null, 0);
 
-            if (Logger.isLoggingEnabled()) {
-                Logger.debug("%s.%s: Starting download intent service.", CLASS_NAME, "retrieveStockQuotesFromWebService");
-            }
+            if (DEBUG) Log.d(TAG, "Starting download intent service.");
+
 
             this.getActivity().startService(intent);
         }
     }
 
-
     /**
      * A constructor that gets a weak reference to the enclosing class. We do this to avoid memory leaks during Java
      * Garbage Collection.
-     *
-     * @see https://groups.google.com/forum/#!msg/android-developers/1aPZXZG6kWk/lIYDavGYn5UJ
+     * <p/>
+     * groups.google.com/forum/#!msg/android-developers/1aPZXZG6kWk/lIYDavGYn5UJ
      */
-    private static class StockDownloadHandler extends Handler {
+    private class StockDownloadHandler extends Handler {
         // Allows Fragment to be garbage collected properly
         private WeakReference<StockListFragment> mFragment;
 
@@ -418,33 +213,24 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
             }
 
             QuoteResponse quoteResponse = DownloadIntentService.getQuoteResponse(message);
-            fragment.dismissProgressDialog();
+
+            hideSwipeProgress();
+//            fragment.dismissProgressDialog();
             fragment.updateStockListDone(quoteResponse);
-            fragment.enableRefreshButton();
+//            fragment.enableRefreshButton();
+            enableSwipe();
         }
     }
 
-    private void displayProgressDialog() {
-        if (this.isVisible()) {
-            ImageView progress = (ImageView) getView().findViewById(R.id.imgProgress);
-            if (progress != null) {
-                progress.setVisibility(View.VISIBLE);
-                final AnimationDrawable frameAnimation = (AnimationDrawable) progress.getDrawable();
-                frameAnimation.setCallback(progress);
-                frameAnimation.setVisible(true, true);
-            }
-        }
-    }
+    /**
+     * Callback from StockLoader, called when the list of stocks has been retrieved from the database
+     */
+    @Override
+    public void onStocksLoadedFromDatabase(List<Stock> stocks) {
+        if (DEBUG) Log.d(TAG, "onStocksLoadedFromDatabase");
 
-    private void dismissProgressDialog() {
-        if (this.isVisible()) {
-            ImageView progress = (ImageView) getView().findViewById(R.id.imgProgress);
-            if (progress != null) {
-                progress.setVisibility(View.INVISIBLE);
-                final AnimationDrawable frameAnimation = (AnimationDrawable) progress.getDrawable();
-                frameAnimation.setVisible(false, false);
-            }
-        }
+        this.stockList = stocks;
+        retrieveStockQuotesFromWebService();
     }
 
     /**
@@ -466,9 +252,8 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
     }
 
     private void showErrorMessage() {
-        new Builder(this.getActivity()).setMessage(R.string.load_error).setTitle(R.string.app_name).setPositiveButton(android.R.string.ok, null).show();
+        new AlertDialog.Builder(this.getActivity()).setMessage(R.string.load_error).setTitle(R.string.app_name).setPositiveButton(android.R.string.ok, null).show();
     }
-
 
     /**
      * Update each Quote object in the quoteList with the quantity from the database
@@ -480,14 +265,12 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
             for (Quote q : quotes.getQuotes()) {
                 Stock s = getStockBySymbol(stockList, q.getSymbol());
                 if (s != null) {
-                    if (Logger.isLoggingEnabled()) {
-                        Logger.debug("%s.%s: Adding quantity to Quote for symbol '%s'", CLASS_NAME, "updateQuoteResponseObjects", q.getSymbol());
-                    }
+                    if (DEBUG) Log.d(TAG, "Adding quantity to Quote for symbol " + q.getSymbol());
+
                     q.setQuantity(s.getQuantity());
 
-                    if (Logger.isLoggingEnabled()) {
-                        Logger.debug("%s.%s: Adding SQLite id to Quote for symbol '%s'", CLASS_NAME, "updateQuoteResponseObjects", q.getSymbol());
-                    }
+                    if (DEBUG) Log.d(TAG, "Adding SQLite id to Quote for symbol " + q.getSymbol());
+
                     q.setId(s.getId());
                 }
             }
@@ -501,6 +284,46 @@ public class StockListFragment extends ListFragment implements ActionBarCallback
             }
         }
         return null;
+    }
+
+    /**
+     * Update the ListView with the provided list of Quote objects
+     *
+     * @param quoteList
+     */
+    private void updateStockListDisplay(List<Quote> quoteList)
+    {
+        parentObjectList = getStockListItems(quoteList);
+
+        StockExpandableAdapter mStockExpandableAdapter = new StockExpandableAdapter(getActivity().getBaseContext(), parentObjectList);
+        mStockExpandableAdapter.setParentClickableViewAnimationDefaultDuration();
+        mStockExpandableAdapter.setParentAndIconExpandOnClick(true);
+        mRecyclerView.setAdapter(mStockExpandableAdapter);
+    }
+
+    private List<ParentObject> getStockListItems(List<Quote> quoteList) {
+        List<ParentObject> list = new ArrayList<>();
+        if(quoteList == null || quoteList.isEmpty()) {
+            return list;
+        }
+
+        for(Quote quote : quoteList) {
+            Stock s = new Stock(quote.getId(), quote.getSymbol(), Double.valueOf(quote.getLastTradePriceOnly()), System.currentTimeMillis());
+            QuoteListItem q = new QuoteListItem(s, Arrays.<Object>asList(Quote.QuoteBuilder.aQuote()
+                    .change(quote.getChange())
+                    .stockExchange(quote.getStockExchange())
+                    .lastTradePriceOnly(quote.getLastTradePriceOnly())
+                    .symbol(quote.getSymbol())
+                    .name(quote.getName())
+                    .daysLow(quote.getDaysLow())
+                    .daysHigh(quote.getDaysHigh())
+                    .quantity(quote.getQuantity())
+                    .yearHigh(quote.getYearHigh())
+                    .yearLow(quote.getYearLow()).build()));
+            list.add(q);
+        }
+
+        return list;
     }
 
 }

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+
+        android:id="@+id/swipe">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/background_light"/>
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
+    <LinearLayout
+        android:id="@+id/dividerLine"
+        android:layout_width="fill_parent"
+        android:layout_height="1dp"
+        android:layout_above="@+id/totalsLayout"
+        android:background="?android:attr/listDivider"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"/>
+
+    <LinearLayout
+        android:id="@+id/totalsLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="@android:color/background_light"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="16dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16dp">
+
+        <RelativeLayout
+            android:id="@+id/labelLayout"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/totalMarkeyValueLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/total_market_value"
+                android:textSize="@dimen/stock_subhead_size"/>
+
+            <TextView
+                android:id="@+id/marketValueChangeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/totalMarkeyValueLabel"
+                android:paddingTop="16dp"
+                android:text="@string/total_market_change"
+                android:textSize="@dimen/stock_subhead_size"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/valueLayout"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center_vertical"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/totalMarketValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$ 25,012.54"
+                android:textSize="@dimen/stock_subhead_size"/>
+
+            <TextView
+                android:id="@+id/marketValueChange"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/totalMarketValue"
+                android:paddingTop="16dp"
+                android:text="$ 504.12"
+                android:textSize="@dimen/stock_subhead_size"/>
+
+            <TextView
+                android:id="@+id/totalMarketChangePercent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/totalMarketValue"
+                android:layout_toRightOf="@+id/marketValueChange"
+                android:paddingLeft="12dp"
+                android:paddingTop="16dp"
+                android:text="-1.49%"
+                android:textSize="@dimen/stock_subhead_size"/>
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>
