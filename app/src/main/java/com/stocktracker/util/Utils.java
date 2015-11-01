@@ -1,5 +1,6 @@
 package com.stocktracker.util;
 
+import android.os.Build;
 import android.util.Log;
 
 import com.stocktracker.data.Quote;
@@ -29,5 +30,9 @@ public class Utils {
             if(DEBUG) Log.d(TAG, "Error parsing quantity " + quantityStr + " to double.");
             return false;
         }
+    }
+
+    public static boolean hasMarshmallow() {
+        return android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }
 }

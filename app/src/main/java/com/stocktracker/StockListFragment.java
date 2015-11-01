@@ -53,6 +53,10 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     // stock quote data loaded from web service and saved between configuration changes
     private List<ParentObject> parentObjectList;
 
+    private List<Quote> mQuoteList;
+
+    private RecyclerView.Adapter mStockAdapter;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +64,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
         if (DEBUG) Log.d(TAG, "onCreate");
 
         parentObjectList = new ArrayList<>();
+        mQuoteList = new ArrayList<>();
 
         new Handler().post(new Runnable() {
             @Override
@@ -78,34 +83,39 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
 
         RelativeLayout relativeLayout = (RelativeLayout) inflater.inflate(R.layout.stock_fragment_list, container, false);
         mRecyclerView = (RecyclerView) relativeLayout.findViewById(R.id.recyclerview);
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mRecyclerView.getContext()));
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
-        StockExpandableAdapter mStockExpandableAdapter = new StockExpandableAdapter(getActivity().getBaseContext(), parentObjectList);
-        mStockExpandableAdapter.setParentClickableViewAnimationDefaultDuration();
-        mStockExpandableAdapter.setParentAndIconExpandOnClick(true);
-        mRecyclerView.setAdapter(mStockExpandableAdapter);
+        mStockAdapter = new StockAdapter(getActivity(), mQuoteList);
+        mRecyclerView.setAdapter(mStockAdapter);
+
+
+//        StockExpandableAdapter mStockExpandableAdapter = new StockExpandableAdapter(getActivity().getBaseContext(), parentObjectList);
+//        mStockExpandableAdapter.setParentClickableViewAnimationDefaultDuration();
+//        mStockExpandableAdapter.setParentAndIconExpandOnClick(true);
+//        mRecyclerView.setAdapter(mStockExpandableAdapter);
 
         mRefreshLayout = (SwipeRefreshLayout) relativeLayout.findViewById(R.id.swipe);
         mRefreshLayout.setOnRefreshListener(this);
         mRecyclerView.setLongClickable(true);
+
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View view, int position) {
                 if (DEBUG) Log.d(TAG, "onItemClick, position = " + position);
-                if(view.isSelected()) {
-                    view.setSelected(false);
-                }
+                view.setSelected(false);
             }
 
             @Override
             public void onItemLongClick(View view, int position) {
                 if (DEBUG) Log.d(TAG, "onItemLongClick, position = " + position);
-                StockParentViewHolder viewHolder = (StockParentViewHolder)mRecyclerView.findViewHolderForLayoutPosition(position);
-                if(!viewHolder.isExpanded()) {
-                    view.setSelected(true);
-                }
+//                StockParentViewHolder viewHolder = (StockParentViewHolder)mRecyclerView.findViewHolderForLayoutPosition(position);
+//                if(!viewHolder.isExpanded()) {
+//                    view.setSelected(true);
+//                }
+
+                mRecyclerView.getChildAt(position).setSelected(true);
             }
         }));
 
@@ -245,7 +255,8 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
             if (quoteResponse != null) {
                 updateQuoteResponseObjects(quoteResponse);
                 if (this.isVisible()) {
-                    updateStockListDisplay(quoteResponse.getQuotes());
+                    mQuoteList = quoteResponse.getQuotes();
+                    updateStockListDisplay(); //quoteResponse.getQuotes());
                 }
             }
         }
@@ -289,16 +300,17 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     /**
      * Update the ListView with the provided list of Quote objects
      *
-     * @param quoteList
      */
-    private void updateStockListDisplay(List<Quote> quoteList)
+    private void updateStockListDisplay()
     {
-        parentObjectList = getStockListItems(quoteList);
+        mStockAdapter = new StockAdapter(getActivity(), mQuoteList);
+        mRecyclerView.setAdapter(mStockAdapter);
 
-        StockExpandableAdapter mStockExpandableAdapter = new StockExpandableAdapter(getActivity().getBaseContext(), parentObjectList);
-        mStockExpandableAdapter.setParentClickableViewAnimationDefaultDuration();
-        mStockExpandableAdapter.setParentAndIconExpandOnClick(true);
-        mRecyclerView.setAdapter(mStockExpandableAdapter);
+//        parentObjectList = getStockListItems(mQuoteList);
+//        StockExpandableAdapter mStockExpandableAdapter = new StockExpandableAdapter(getActivity().getBaseContext(), parentObjectList);
+//        mStockExpandableAdapter.setParentClickableViewAnimationDefaultDuration();
+//        mStockExpandableAdapter.setParentAndIconExpandOnClick(true);
+//        mRecyclerView.setAdapter(mStockExpandableAdapter);
     }
 
     private List<ParentObject> getStockListItems(List<Quote> quoteList) {
@@ -325,5 +337,6 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
 
         return list;
     }
+
 
 }
