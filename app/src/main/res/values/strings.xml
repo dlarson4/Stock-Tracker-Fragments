@@ -8,6 +8,10 @@
     <string name="plus">+</string>
     <string name="minus">-</string>
 
+    <string name="edit">Edit</string>
+    <string name="details">Details</string>
+    <string name="delete">Delete</string>
+
     <string name="total_market_value">Total Market Value</string>
     <string name="total_market_change">Market Value Change</string>
     <string name="add_stock">Add Stock</string>

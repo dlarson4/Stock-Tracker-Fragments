@@ -10,20 +10,23 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.data.Stock;
 import com.stocktracker.db.StockContentProviderFacade;
 
 import static com.stocktracker.BuildConfig.DEBUG;
 
-public class StockTrackerActivity extends AppCompatActivity implements AddStockDialogFragment.AddStockDialogListener {
+public class StockTrackerActivity extends AppCompatActivity implements AddStockDialogFragment.AddStockDialogListener, StockListFragment.StockListListener {
     private final static String TAG = StockTrackerActivity.class.getSimpleName();
 
     private static final String FRAGMENT_TAGS[] = {StockListFragment.TAG, AddStockDialogFragment.TAG};
@@ -43,9 +46,11 @@ public class StockTrackerActivity extends AppCompatActivity implements AddStockD
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        final ActionBar ab = getSupportActionBar();
-        ab.setHomeAsUpIndicator(R.drawable.ic_menu);
-        ab.setDisplayHomeAsUpEnabled(true);
+        final ActionBar supportActionBar = getSupportActionBar();
+        if(supportActionBar != null) {
+            supportActionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+            supportActionBar.setDisplayHomeAsUpEnabled(true);
+        }
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -134,14 +139,14 @@ public class StockTrackerActivity extends AppCompatActivity implements AddStockD
     /**
      * Get the current fragment's tag or null
      *
-     * @return
+     * @return The current fragment's tag
      */
     private String getCurrentFragmentTag() {
-        Fragment f = null;
+        Fragment f;
         for (String tag : FRAGMENT_TAGS) {
             f = getSupportFragmentManager().findFragmentByTag(tag);
 
-            if (DEBUG) Log.d(TAG, "Fragment tag found '%s', isVisible? = " + (f == null ? false : f.isVisible()));
+            if (DEBUG) Log.d(TAG, "Fragment tag found '%s', isVisible? = " + (f != null && f.isVisible()));
 
             if (f != null && f.isVisible()) {
                 return tag;
@@ -154,7 +159,7 @@ public class StockTrackerActivity extends AppCompatActivity implements AddStockD
      * Retrieve the StockListFragment from the fragment manager or null if it's not currently
      * held by the fragment manager
      *
-     * @return
+     * @return The StockListFragment or null if not found
      */
     private StockListFragment getStockListFragment() {
         Fragment f = getSupportFragmentManager().findFragmentByTag(StockListFragment.TAG);
@@ -169,5 +174,20 @@ public class StockTrackerActivity extends AppCompatActivity implements AddStockD
         if (slf != null) {
             slf.updateStockList();
         }
+    }
+
+    @Override
+    public void editStock(Quote quote) {
+
+    }
+
+    @Override
+    public void deleteStock(String symbol, long id) {
+
+    }
+
+    @Override
+    public void viewStockDetails(Quote quote, long id) {
+
     }
 }

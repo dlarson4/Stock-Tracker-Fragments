@@ -10,6 +10,7 @@
         <item name="colorPrimaryDark">#303F9F</item>
         <item name="colorAccent">#FF4081</item>
         <item name="android:windowBackground">@color/window_background</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
     <!--<style name="Widget.CardContent" parent="android:Widget">-->
