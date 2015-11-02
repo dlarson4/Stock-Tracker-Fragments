@@ -4,14 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +18,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.stocktracker.data.QuoteResponse;
+import com.stocktracker.db.StockContentProviderFacade;
 import com.stocktracker.util.UrlBuilder;
 import com.stocktracker.util.Utils;
 
@@ -36,6 +35,7 @@ public class AddStockDialogFragment extends DialogFragment {
     private AddStockDialogListener mCallback;
     private Handler downloadHandler = null;
 
+    private StockContentProviderFacade mDao;
     private EditText mSymbolEditText;
     private EditText mQuantityEditText;
 
@@ -46,62 +46,47 @@ public class AddStockDialogFragment extends DialogFragment {
         if (DEBUG) Log.d(TAG, "onCreate");
 
         downloadHandler = new StockDownloadHandler(this);
-//        dao = new StockContentProviderFacade(this.getActivity());
+        mDao = new StockContentProviderFacade(this.getActivity());
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
-        LayoutInflater inflater = getActivity().getLayoutInflater();
+        final LayoutInflater inflater = getActivity().getLayoutInflater();
 
         final View view = inflater.inflate(R.layout.add_stock, null);
-        builder.setView(view);
-
         mSymbolEditText = (EditText) view.findViewById(R.id.stockTicker);
         mQuantityEditText = (EditText) view.findViewById(R.id.stockQuantity);
 
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setView(view);
         builder.setMessage(R.string.add_stock);
-        builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                //addStock();
-                    }
-                })
-                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-//                        AddStockDialogFragment.this.dismiss();
+        builder.setPositiveButton(R.string.save, null);
+        builder.setNegativeButton(R.string.cancel, null);
+
+        final AlertDialog alertDialog = builder.create();
+
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                final Button positiveButton = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        addStock();
                     }
                 });
 
+                final Button negativeButton = alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+                negativeButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        alertDialog.dismiss();
+                    }
+                });
+            }
+        });
 
-
-        return builder.create();
-    }
-
-
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();    //super.onStart() is where dialog.show() is actually called on the underlying dialog, so we have to do it after this point
-        AlertDialog d = (AlertDialog)getDialog();
-        if(d != null)
-        {
-            Button positiveButton = d.getButton(Dialog.BUTTON_POSITIVE);
-            positiveButton.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-//                    Boolean wantToCloseDialog = false;
-//                    //Do stuff, possibly set wantToCloseDialog to true then...
-//                    if(wantToCloseDialog)
-//                        dismiss();
-//                    //else dialog stays open. Make sure you have an obvious way to close the dialog especially if you set cancellable to false.
-                    addStock();
-                }
-            });
-        }
+        return alertDialog;
     }
 
     private void addStock() {
@@ -111,19 +96,16 @@ public class AddStockDialogFragment extends DialogFragment {
         if (DEBUG) Log.d(TAG, "Stock symbol value entered = " + stockSymbol + ", quantity = " + quantityStr);
 
         if (!(isValidSymbol(stockSymbol))) {
-            Toast toast = Toast.makeText(this.getActivity(), "No stock symbol entered", Toast.LENGTH_SHORT);
-            toast.show();
+            Toast.makeText(this.getActivity(), "No stock symbol entered", Toast.LENGTH_SHORT).show();
         } else if (!Utils.isValidQuantity(quantityStr)) {
-            Toast toast = Toast.makeText(this.getActivity(), "Invalid quantity (must be greater than 0)", Toast.LENGTH_SHORT);
-            toast.show();
+            Toast.makeText(this.getActivity(), "Invalid quantity (must be greater than 0)", Toast.LENGTH_SHORT).show();
         } else {
-            boolean duplicate = false; // dao.isDuplicate(stockSymbol); // TODO should be made asynchronous
+            final boolean duplicate = mDao.isDuplicate(stockSymbol); // TODO should be made asynchronous
 
             if (DEBUG) Log.d(TAG, "Stock " + stockSymbol + " is duplicate? " + duplicate);
 
             if (duplicate) {
-                Toast toast = Toast.makeText(this.getActivity(), getString(R.string.stock_alredy_exists, stockSymbol), Toast.LENGTH_SHORT);
-                toast.show();
+                Toast.makeText(this.getActivity(), getString(R.string.stock_alredy_exists, stockSymbol), Toast.LENGTH_SHORT).show();
             } else {
                 final String url = UrlBuilder.buildQuoteUrl(stockSymbol);
 
@@ -177,12 +159,11 @@ public class AddStockDialogFragment extends DialogFragment {
         if (Utils.isValidStock(quoteResponse)) {
             if (DEBUG) Log.d(TAG, "New stock " + ticker + " verified.");
             mCallback.saveNewStock(quoteResponse, quantity);
-
         } else {
             if (DEBUG) Log.d(TAG, "User attempted to add invalid stock " + ticker);
-            Toast toast = Toast.makeText(getActivity(), getString(R.string.unrecognized_stock, ticker), Toast.LENGTH_SHORT);
-            toast.show();
+            Toast.makeText(getActivity(), getString(R.string.unrecognized_stock, ticker), Toast.LENGTH_SHORT).show();
         }
+        AddStockDialogFragment.this.dismiss();
     }
 
     public interface AddStockDialogListener {
