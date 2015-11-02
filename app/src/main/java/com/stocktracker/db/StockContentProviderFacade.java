@@ -29,6 +29,7 @@ public class StockContentProviderFacade {
     }
 
     public Stock insert(String stock, double quantity) {
+        if (DEBUG) Log.d(TAG, "insert");
         ContentValues values = new ContentValues();
         values.put(StockTable.COLUMN_STOCK, stock);
         values.put(StockTable.COLUMN_QUANTITY, quantity);
@@ -68,21 +69,17 @@ public class StockContentProviderFacade {
 
     public boolean isDuplicate(String stock) {
         final String[] projection = {StockTable.COLUMN_STOCK};
-        final String selection = StockTable.COLUMN_STOCK + " = UPPER(?)";
+        final String selectionClause = StockTable.COLUMN_STOCK + " = ?";
         final String[] selectionArgs = {stock};
 
         final Uri uri = StockContract.CONTENT_URI;
 
         if (DEBUG) Log.d(TAG, "Uri for content provider = " + uri);
 
-
         Cursor cursor = null;
         try {
             if (DEBUG) Log.d(TAG, "About to get cursor");
-
-
-            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
-
+            cursor = context.getContentResolver().query(uri, projection, selectionClause, selectionArgs, null);
             return (cursor != null && cursor.moveToFirst());
         } finally {
             close(cursor);
