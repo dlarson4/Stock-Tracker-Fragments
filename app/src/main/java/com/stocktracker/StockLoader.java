@@ -1,13 +1,12 @@
 package com.stocktracker;
 
-
 import android.content.Context;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 
 import com.stocktracker.contentprovider.StockContract;
@@ -25,7 +24,7 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor> {
     private Context context;
     private StockLoaderCallback callback;
 
-    static interface StockLoaderCallback {
+    interface StockLoaderCallback {
         void onStocksLoadedFromDatabase(List<Stock> stocks);
     }
 
@@ -35,7 +34,7 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     @Override
-    public android.support.v4.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         if (DEBUG) Log.d(TAG, "onCreateLoader");
 
         final Uri uri = StockContract.CONTENT_URI;
@@ -44,19 +43,8 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor> {
         return new CursorLoader(context, uri, projection, null, null, StockTable.COLUMN_STOCK);
     }
 
-    //    @Override
-//    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-//        if (DEBUG) Log.d(TAG, "onCreateLoader");
-//
-//
-//        final Uri uri = StockContract.CONTENT_URI;
-//        final String[] projection = StockTable.ALL_COLUMNS;
-//
-//        return new CursorLoader(context, uri, projection, null, null, StockTable.COLUMN_STOCK);
-//    }
-
     @Override
-    public void onLoadFinished(android.support.v4.content.Loader<Cursor> loader, Cursor cursor) {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         if (DEBUG) Log.d(TAG, "onLoadFinished");
 
         List<Stock> stocks = new ArrayList<Stock>();
@@ -77,36 +65,9 @@ public class StockLoader implements LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     @Override
-    public void onLoaderReset(android.support.v4.content.Loader<Cursor> loader) {
+    public void onLoaderReset(Loader<Cursor> loader) {
         if (DEBUG) Log.d(TAG, "onLoaderReset");
     }
-
-//    @Override
-//    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
-//        if (DEBUG) Log.d(TAG, "onLoadFinished");
-//
-//
-//        List<Stock> stocks = new ArrayList<Stock>();
-//
-//        if (cursor != null) {
-//            if (cursor.moveToFirst()) {
-//                do {
-//                    if (DEBUG) Log.d(TAG, "Creating stock");
-//
-//                    stocks.add(createStock(cursor));
-//                } while (cursor.moveToNext());
-//            }
-//        }
-//
-//        if (callback != null) {
-//            callback.onStocksLoadedFromDatabase(stocks);
-//        }
-//    }
-
-//    @Override
-//    public void onLoaderReset(Loader<Cursor> loader) {
-//        if (DEBUG) Log.d(TAG, "onLoaderReset");
-//    }
 
     private Stock createStock(Cursor cursor) {
         long id = cursor.getLong(0);
