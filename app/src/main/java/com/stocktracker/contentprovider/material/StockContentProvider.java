@@ -45,7 +45,6 @@ public class StockContentProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         if (DEBUG) Log.d(TAG, "uri = " + uri);
 
-
         checkColumns(projection);
 
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
@@ -54,7 +53,6 @@ public class StockContentProvider extends ContentProvider {
         int uriType = URI_MATCHER.match(uri);
 
         if (DEBUG) Log.d(TAG, "uriType = " + uriType);
-
 
         switch (uriType) {
             case STOCKS:
@@ -88,7 +86,6 @@ public class StockContentProvider extends ContentProvider {
     public String getType(Uri uri) {
         if (DEBUG) Log.d(TAG, "uri = " + uri);
 
-
         switch (URI_MATCHER.match(uri)) {
             case STOCK_ID:
                 return StockContract.CONTENT_ITEM_TYPE;
@@ -102,7 +99,6 @@ public class StockContentProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         if (DEBUG) Log.d(TAG, "uri = " + uri);
-
 
         int uriType = URI_MATCHER.match(uri);
         long id;
@@ -125,7 +121,6 @@ public class StockContentProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         if (DEBUG) Log.d(TAG, "uri = " + uri);
-
 
         int uriType = URI_MATCHER.match(uri);
         int rowsDeleted;
@@ -156,7 +151,6 @@ public class StockContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         if (DEBUG) Log.d(TAG, "uri = " + uri);
-
 
         int uriType = URI_MATCHER.match(uri);
         SQLiteDatabase sqlDB = database.getWritableDatabase();
