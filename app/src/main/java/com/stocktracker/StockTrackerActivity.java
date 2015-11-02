@@ -10,11 +10,9 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -170,9 +168,9 @@ public class StockTrackerActivity extends AppCompatActivity implements AddStockD
     }
 
     private void updateStockList() {
-        StockListFragment slf = getStockListFragment();
-        if (slf != null) {
-            slf.updateStockList();
+        StockListFragment stockListFragment = getStockListFragment();
+        if (stockListFragment != null) {
+            stockListFragment.updateStockList();
         }
     }
 
@@ -183,11 +181,19 @@ public class StockTrackerActivity extends AppCompatActivity implements AddStockD
 
     @Override
     public void deleteStock(String symbol, long id) {
-
+        if (DEBUG) Log.d(TAG, "deleteStock");
+        deleteStock(id);
     }
 
     @Override
     public void viewStockDetails(Quote quote, long id) {
 
+    }
+
+    private void deleteStock(long id)
+    {
+        if (DEBUG) Log.d(TAG, "Deleting stock " + id);
+        dao.delete(id); // TODO should be made asynchronous
+        updateStockList();
     }
 }

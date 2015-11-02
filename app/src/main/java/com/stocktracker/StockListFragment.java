@@ -205,18 +205,17 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
 
         if (DEBUG) Log.d(TAG, "buildAllStocksQuoteUrl() returned " + url);
 
-        if (url != null) {
+        if(url == null) {
+            hideSwipeProgress();
+        } else {
             // temporarily disable Refresh button
             if (this.isVisible()) {
                 disableSwipe();
             }
-
             showSwipeProgress();
-
             Intent intent = DownloadIntentService.createIntent(this.getActivity(), Uri.parse(url), downloadHandler, null, 0);
 
             if (DEBUG) Log.d(TAG, "Starting download intent service.");
-
 
             this.getActivity().startService(intent);
         }

@@ -74,7 +74,7 @@
                 android:id="@+id/totalMarketValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="$ 25,012.54"
+                android:text=""
                 android:textSize="@dimen/stock_subhead_size"/>
 
             <TextView
@@ -83,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/totalMarketValue"
                 android:paddingTop="16dp"
-                android:text="$ 504.12"
+                android:text=""
                 android:textSize="@dimen/stock_subhead_size"/>
 
             <TextView
@@ -94,7 +94,7 @@
                 android:layout_toRightOf="@+id/marketValueChange"
                 android:paddingLeft="12dp"
                 android:paddingTop="16dp"
-                android:text="-1.49%"
+                android:text=""
                 android:textSize="@dimen/stock_subhead_size"/>
 
         </RelativeLayout>
