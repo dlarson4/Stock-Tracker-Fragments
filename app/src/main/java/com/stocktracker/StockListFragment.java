@@ -20,13 +20,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.data.Stock;
+import com.stocktracker.util.FormatUtils;
 import com.stocktracker.util.UrlBuilder;
 
 import java.lang.ref.WeakReference;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +47,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     private RecyclerView mRecyclerView;
 
     // implementation of LoaderManager.LoaderCallbacks, used to load stocks from the database
-    private StockLoader loaderCallback = null;
+    private StockLoader mLoaderCallback = null;
 
     private android.view.ActionMode mActionMode;
     private ActionBarCallback mActionModeCallback = new ActionBarCallback(this);
@@ -53,11 +56,9 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     private Handler downloadHandler = null;
 
     // list of stocks loaded from the database
-    private List<Stock> stockList;
+    private List<Stock> mStockList;
 
     private List<Quote> mQuoteList;
-
-//    private RecyclerView.Adapter mStockAdapter;
 
     private int mSelectedIndex;
 
@@ -86,7 +87,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
         });
 
         downloadHandler = new StockDownloadHandler(this);
-        loaderCallback = new StockLoader(getActivity(), this);
+        mLoaderCallback = new StockLoader(getActivity(), this);
     }
 
     @Nullable
@@ -194,13 +195,13 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
      */
     private void loadStockListFromDatabase() {
         if (DEBUG) Log.d(TAG, "loadStockListFromDatabase");
-        getLoaderManager().initLoader(LOADER_ID, null, loaderCallback);
+        getLoaderManager().initLoader(LOADER_ID, null, mLoaderCallback);
     }
 
     private void retrieveStockQuotesFromWebService() {
         if (DEBUG) Log.d(TAG, "retrieveStockQuotesFromWebService");
 
-        final String url = UrlBuilder.buildAllStocksQuoteUrl(this.stockList);
+        final String url = UrlBuilder.buildAllStocksQuoteUrl(this.mStockList);
 
         if (DEBUG) Log.d(TAG, "buildAllStocksQuoteUrl() returned " + url);
 
@@ -247,9 +248,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
             QuoteResponse quoteResponse = DownloadIntentService.getQuoteResponse(message);
 
             hideSwipeProgress();
-//            fragment.dismissProgressDialog();
             fragment.updateStockListDone(quoteResponse);
-//            fragment.enableRefreshButton();
             enableSwipe();
         }
     }
@@ -261,7 +260,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     public void onStocksLoadedFromDatabase(List<Stock> stocks) {
         if (DEBUG) Log.d(TAG, "onStocksLoadedFromDatabase");
 
-        this.stockList = stocks;
+        this.mStockList = stocks;
         retrieveStockQuotesFromWebService();
     }
 
@@ -292,9 +291,9 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
      * @param quotes Quote object
      */
     private void updateQuoteResponseObjects(QuoteResponse quotes) {
-        if (quotes != null && !quotes.getLang().isEmpty() && stockList != null && !stockList.isEmpty()) {
+        if (quotes != null && !quotes.getLang().isEmpty() && mStockList != null && !mStockList.isEmpty()) {
             for (Quote q : quotes.getQuotes()) {
-                Stock s = getStockBySymbol(stockList, q.getSymbol());
+                Stock s = getStockBySymbol(mStockList, q.getSymbol());
                 if (s != null) {
                     if (DEBUG) Log.d(TAG, "Adding quantity to Quote for symbol " + q.getSymbol());
 
@@ -322,6 +321,15 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     private void updateStockListDisplay() {
         final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), mQuoteList);
         mRecyclerView.setAdapter(mStockAdapter);
+
+        final BigDecimal marketValue = FormatUtils.getTotalMarketValue(mQuoteList);
+        final BigDecimal previousMarketValue = FormatUtils.getPreviousMarketValue(mQuoteList);
+
+        if (DEBUG) Log.d(TAG, "Market Total BigDecimal = " + marketValue);
+        if (DEBUG) Log.d(TAG, "Previous Market Total BigDecimal = " + previousMarketValue);
+
+        new MarketTotalUiUpdater(getActivity(), marketValue).update();
+        new MarketChangeUiUpdater(getActivity(), marketValue, previousMarketValue).update();
     }
 
 
