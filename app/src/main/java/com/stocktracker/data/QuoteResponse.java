@@ -99,7 +99,7 @@ public class QuoteResponse implements Parcelable
         this.created = new Date(in.readLong());
         this.lang = in.readString();
         
-        this.quotes = new java.util.ArrayList<Quote>();
+        this.quotes = new java.util.ArrayList<>();
         in.readList(this.quotes, null);
     }
 

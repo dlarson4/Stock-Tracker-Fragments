@@ -57,7 +57,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
 
     private List<Quote> mQuoteList;
 
-    private RecyclerView.Adapter mStockAdapter;
+//    private RecyclerView.Adapter mStockAdapter;
 
     private int mSelectedIndex;
 
@@ -99,7 +99,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
-        mStockAdapter = new StockAdapter(getActivity(), mQuoteList);
+        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), mQuoteList);
         mRecyclerView.setAdapter(mStockAdapter);
 
         mRefreshLayout = (SwipeRefreshLayout) relativeLayout.findViewById(R.id.swipe);
@@ -319,9 +319,8 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
      * Update the ListView with the provided list of Quote objects
      *
      */
-    private void updateStockListDisplay()
-    {
-        mStockAdapter = new StockAdapter(getActivity(), mQuoteList);
+    private void updateStockListDisplay() {
+        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), mQuoteList);
         mRecyclerView.setAdapter(mStockAdapter);
     }
 

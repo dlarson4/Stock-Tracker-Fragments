@@ -42,11 +42,13 @@ public class StockContentProviderFacade {
 
         if (DEBUG) Log.d(TAG, "newRowUri = " + newRowUri);
 
-        Cursor cursor = context.getContentResolver().query(newRowUri, StockTable.ALL_COLUMNS, null, null, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            Stock newStock = createStock(cursor);
-            close(cursor);
-            return newStock;
+        if(newRowUri != null) {
+            Cursor cursor = context.getContentResolver().query(newRowUri, StockTable.ALL_COLUMNS, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                Stock newStock = createStock(cursor);
+                close(cursor);
+                return newStock;
+            }
         }
 
         return null;
@@ -88,7 +90,7 @@ public class StockContentProviderFacade {
     }
 
     public List<Stock> getStocks() {
-        List<Stock> list = new ArrayList<Stock>();
+        List<Stock> list = new ArrayList<>();
 
         final String[] projection = StockTable.ALL_COLUMNS;
         final Uri uri = StockContract.CONTENT_URI;

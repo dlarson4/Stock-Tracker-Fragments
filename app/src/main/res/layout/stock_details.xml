@@ -12,7 +12,7 @@
         android:id="@+id/quantityLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Quantity" />
+        android:text="@string/quantity" />
 
     <TextView
         android:id="@+id/quantity"

@@ -52,7 +52,7 @@ public class JsonParser {
             if (resultsObj != null) {
                 JSONArray quoteArr = getQuoteArray(resultsObj);
                 if (quoteArr != null) {
-                    List<Quote> quotes = new ArrayList<Quote>();
+                    List<Quote> quotes = new ArrayList<>();
                     for (int i = 0; i < quoteArr.length(); i++) {
                         try {
                             Quote quote = createQuote(quoteArr.getJSONObject(i));
@@ -75,7 +75,7 @@ public class JsonParser {
             Object quote = json.get("quote");
             if (quote instanceof JSONObject) {
                 JSONArray arr = new JSONArray();
-                arr.put((JSONObject) quote);
+                arr.put(quote);
                 return arr;
             } else if (quote instanceof JSONArray) {
                 return (JSONArray) quote;

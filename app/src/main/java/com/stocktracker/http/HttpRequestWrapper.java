@@ -3,8 +3,6 @@ package com.stocktracker.http;
 
 import android.util.Log;
 
-import com.stocktracker.DownloadIntentService;
-
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedInputStream;
@@ -35,7 +33,6 @@ public class HttpRequestWrapper
     {
         if (DEBUG) Log.d(TAG, "Performing HTTP GET of URL " + this.url);
 
-
         HttpURLConnection urlConnection = null;
         try
         {
@@ -58,7 +55,7 @@ public class HttpRequestWrapper
 
     private HttpTaskResponse doHttpGet(HttpURLConnection urlConnection)
     {
-        int responseCode = 0;
+        int responseCode;
         try
         {
             urlConnection = (HttpURLConnection)new URL(url).openConnection();

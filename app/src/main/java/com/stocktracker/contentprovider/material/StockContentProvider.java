@@ -105,7 +105,7 @@ public class StockContentProvider extends ContentProvider {
 
 
         int uriType = URI_MATCHER.match(uri);
-        long id = 0;
+        long id;
         SQLiteDatabase db = database.getWritableDatabase();
 
         switch (uriType) {
@@ -115,9 +115,11 @@ public class StockContentProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
-
-        return Uri.parse(CONTENT_URI.toString() + "/" + id);
+        if(getContext().getContentResolver() != null) {
+            getContext().getContentResolver().notifyChange(uri, null);
+            return Uri.parse(CONTENT_URI.toString() + "/" + id);
+        }
+        return null;
     }
 
     @Override
@@ -126,7 +128,7 @@ public class StockContentProvider extends ContentProvider {
 
 
         int uriType = URI_MATCHER.match(uri);
-        int rowsDeleted = 0;
+        int rowsDeleted;
         SQLiteDatabase db = database.getWritableDatabase();
 
         switch (uriType) {
@@ -158,7 +160,7 @@ public class StockContentProvider extends ContentProvider {
 
         int uriType = URI_MATCHER.match(uri);
         SQLiteDatabase sqlDB = database.getWritableDatabase();
-        int rowsUpdated = 0;
+        int rowsUpdated;
         switch (uriType) {
             case STOCKS: {
                 rowsUpdated = sqlDB.update(StockTable.STOCK_TABLE_NAME, values, selection, selectionArgs);

@@ -48,7 +48,7 @@ public class UrlBuilder {
         private List<String> stockSymbols;
 
         public StockInfoQueryBuilder() {
-            stockSymbols = new ArrayList<String>();
+            stockSymbols = new ArrayList<>();
         }
 
         public StockInfoQueryBuilder stock(String stock) {
@@ -97,13 +97,13 @@ public class UrlBuilder {
 
             String query = String.format(YQL_STOCK_EXISTS_QUERY, this.stockSymbol);
 
-            if (DEBUG) Log.d(TAG, "query = " + query.toString());
+            if (DEBUG) Log.d(TAG, "query = " + query);
 
 
             try {
-                sb.append(URLEncoder.encode(query.toString(), "UTF-8"));
+                sb.append(URLEncoder.encode(query, "UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                if (DEBUG) Log.d(TAG, "Error URL-encoding query " + query.toString());
+                if (DEBUG) Log.d(TAG, "Error URL-encoding query " + query);
             }
             return sb.toString();
         }

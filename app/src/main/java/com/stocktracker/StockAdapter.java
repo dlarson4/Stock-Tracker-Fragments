@@ -21,8 +21,6 @@ import java.util.List;
 public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> {
     private static final String TAG = StockAdapter.class.getSimpleName();
 
-    private final TypedValue mTypedValue = new TypedValue();
-    private int mBackground;
     private List<Quote> mQuotes;
 
     private final LayoutInflater mInflater;
@@ -33,8 +31,9 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
         mQuotes = quotes;
         mInflater = LayoutInflater.from(context);
 
-        context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
-        mBackground = mTypedValue.resourceId;
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.selectableItemBackground, typedValue, true);
+        int background = typedValue.resourceId;
     }
 
     @Override

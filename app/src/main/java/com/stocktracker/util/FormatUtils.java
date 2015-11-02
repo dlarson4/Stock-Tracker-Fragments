@@ -148,13 +148,13 @@ public class FormatUtils
         throw new IllegalArgumentException("Unfathomed double");
     }
 
-    public static enum ChangeType
+    public enum ChangeType
     {
         NoChange(0), Positive(1), Negative(-1), Unknown(-100);
 
         private int id;
 
-        private ChangeType(int id)
+        ChangeType(int id)
         {
             this.id = id;
         }

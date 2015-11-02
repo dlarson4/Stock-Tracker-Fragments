@@ -6,7 +6,7 @@ public class HttpTaskResponse
 {
     public static int HTTP_OK = 200;
     
-    public static enum Status
+    public enum Status
     {
         Success, InvalidUrl, InternalServerError, ServerUnavailable, ErrorReadingResponse;
     }

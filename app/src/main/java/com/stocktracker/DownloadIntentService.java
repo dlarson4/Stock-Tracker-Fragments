@@ -92,7 +92,7 @@ public class DownloadIntentService extends IntentService {
         //Messenger messenger = (Messenger) intent.getExtras().get(MESSENGER);
         QuoteResponse quoteResponse = null;
 
-        JSONObject json = null;
+        JSONObject json;
         try {
             json = new JSONObject(response.getData());
             log(json);
