@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <resources>
-    <string name="app_name">StockTracker Material</string>
+    <string name="app_name">Stock Tracker</string>
 
     <string name="menu_settings">Settings</string>
 
@@ -17,9 +17,9 @@
     <string name="add_stock">Add Stock</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
+    <string name="ok">OK</string>
 
     <string name="stock_symbol">Stock Symbol</string>
-    <string name="stock_quantity">Quantity</string>
 
     <string name="stock_alredy_exists">Stock %1$s already exists</string>
     <string name="unrecognized_stock">Unrecognized stock symdol %1$s</string>
@@ -27,5 +27,6 @@
 
     <string name="load_error">Server Unavailable</string>
     <string name="quantity">Quantity</string>
+    <string name="edit_quantity">Edit Quantity</string>
 
 </resources>

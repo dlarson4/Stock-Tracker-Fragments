@@ -358,12 +358,12 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
                 mCallback.editStock(quote);
                 break;
             }
-            case R.id.action_details: {
-                if (DEBUG) Log.d(TAG, "Details");
-                mActionMode.finish();
-                mCallback.viewStockDetails(quote, quote.getId());
-                break;
-            }
+//            case R.id.action_details: {
+//                if (DEBUG) Log.d(TAG, "Details");
+//                mActionMode.finish();
+//                mCallback.viewStockDetails(quote, quote.getId());
+//                break;
+//            }
             case R.id.action_delete: {
                 if (DEBUG) Log.d(TAG, "Delete");
                 mActionMode.finish();

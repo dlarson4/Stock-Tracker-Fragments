@@ -24,7 +24,8 @@ import com.stocktracker.db.StockContentProviderFacade;
 
 import static com.stocktracker.BuildConfig.DEBUG;
 
-public class StockTrackerActivity extends AppCompatActivity implements AddStockDialogFragment.AddStockDialogListener, StockListFragment.StockListListener {
+public class StockTrackerActivity extends AppCompatActivity
+        implements AddStockDialogFragment.AddStockDialogListener, StockListFragment.StockListListener, EditQuantityDialogFragment.EditStockListener {
     private final static String TAG = StockTrackerActivity.class.getSimpleName();
 
     private static final String FRAGMENT_TAGS[] = {StockListFragment.TAG, AddStockDialogFragment.TAG};
@@ -176,13 +177,19 @@ public class StockTrackerActivity extends AppCompatActivity implements AddStockD
 
     @Override
     public void editStock(Quote quote) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(EditQuantityDialogFragment.QUOTE_ARG, quote);
 
+        EditQuantityDialogFragment editQuantityDialogFragment = new EditQuantityDialogFragment();
+        editQuantityDialogFragment.setArguments(bundle);
+        editQuantityDialogFragment.show(getFragmentManager(), EditQuantityDialogFragment.TAG);
     }
 
     @Override
     public void deleteStock(String symbol, long id) {
-        if (DEBUG) Log.d(TAG, "deleteStock");
-        deleteStock(id);
+        if (DEBUG) Log.d(TAG, "deleteStock, symbol = " + symbol + ", id = " + id);
+        dao.delete(id); // TODO should be made asynchronous
+        updateStockList();
     }
 
     @Override
@@ -190,10 +197,10 @@ public class StockTrackerActivity extends AppCompatActivity implements AddStockD
 
     }
 
-    private void deleteStock(long id)
-    {
-        if (DEBUG) Log.d(TAG, "Deleting stock " + id);
-        dao.delete(id); // TODO should be made asynchronous
+    @Override
+    public void updateStockQuantity(String symbol, double quantity, long id) {
+        if (DEBUG) Log.d(TAG, "updateStockQuantity, symbol = " + symbol + ", id = " + id + ", quantity " + quantity);
+        dao.update(id, quantity); // TODO should be made asynchronous
         updateStockList();
     }
 }
