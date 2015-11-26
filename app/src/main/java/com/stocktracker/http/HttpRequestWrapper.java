@@ -3,7 +3,7 @@ package com.stocktracker.http;
 
 import android.util.Log;
 
-import org.apache.commons.io.IOUtils;
+import com.stocktracker.util.IOUtils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
