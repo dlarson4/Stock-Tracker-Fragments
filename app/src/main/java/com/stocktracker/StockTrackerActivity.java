@@ -23,18 +23,16 @@ public class StockTrackerActivity extends AppCompatActivity
         implements AddStockDialogFragment.AddStockDialogListener, StockListFragment.StockListListener, EditQuantityDialogFragment.EditStockListener {
     private final static String TAG = StockTrackerActivity.class.getSimpleName();
 
-    private static final String FRAGMENT_TAGS[] = {StockListFragment.TAG, AddStockDialogFragment.TAG};
-
     private DialogFragment mAddStockDialog;
 
-    private StockContentProviderFacade dao;
+    private StockContentProviderFacade mDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stock_tracker);
 
-        dao = new StockContentProviderFacade(this);
+        mDao = new StockContentProviderFacade(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -86,7 +84,7 @@ public class StockTrackerActivity extends AppCompatActivity
     private void insertStockSymbol(QuoteResponse parsed, double quantity) {
         if (DEBUG) Log.d(TAG, "Inserting new stock, QuoteResponse = " + parsed);
 
-        Stock newStock = dao.insert(parsed.getQuotes().get(0).getSymbol(), quantity); // TODO should be made asynchronous
+        Stock newStock = mDao.insert(parsed.getQuotes().get(0).getSymbol(), quantity); // TODO should be made asynchronous
 
         if (DEBUG) Log.d(TAG, "Newly created stock = " + newStock);
 
@@ -101,7 +99,7 @@ public class StockTrackerActivity extends AppCompatActivity
      * @return The StockListFragment or null if not found
      */
     private StockListFragment getStockListFragment() {
-        Fragment f = getSupportFragmentManager().findFragmentByTag(StockListFragment.TAG);
+        Fragment f = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
         if (f instanceof StockListFragment) {
             return (StockListFragment) f;
         }
@@ -128,7 +126,7 @@ public class StockTrackerActivity extends AppCompatActivity
     @Override
     public void deleteStock(String symbol, long id) {
         if (DEBUG) Log.d(TAG, "deleteStock, symbol = " + symbol + ", id = " + id);
-        dao.delete(id); // TODO should be made asynchronous
+        mDao.delete(id); // TODO should be made asynchronous
         updateStockList();
     }
 
@@ -140,7 +138,7 @@ public class StockTrackerActivity extends AppCompatActivity
     @Override
     public void updateStockQuantity(String symbol, double quantity, long id) {
         if (DEBUG) Log.d(TAG, "updateStockQuantity, symbol = " + symbol + ", id = " + id + ", quantity " + quantity);
-        dao.update(id, quantity); // TODO should be made asynchronous
+        mDao.update(id, quantity); // TODO should be made asynchronous
         updateStockList();
     }
 }
