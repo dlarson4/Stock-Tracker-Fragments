@@ -46,7 +46,7 @@ public class StockTrackerActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addStock(view);
+                addStock();
             }
         });
 
@@ -58,7 +58,7 @@ public class StockTrackerActivity extends AppCompatActivity
         }
     }
 
-    private void addStock(View view) {
+    private void addStock() {
         mAddStockDialog = new AddStockDialogFragment();
         mAddStockDialog.show(getFragmentManager(), AddStockDialogFragment.TAG);
     }
@@ -84,7 +84,7 @@ public class StockTrackerActivity extends AppCompatActivity
     private void insertStockSymbol(QuoteResponse parsed, double quantity) {
         if (DEBUG) Log.d(TAG, "Inserting new stock, QuoteResponse = " + parsed);
 
-        Stock newStock = mDao.insert(parsed.getQuotes().get(0).getSymbol(), quantity); // TODO should be made asynchronous
+        Stock newStock = mDao.insert(parsed.getQuotes().get(0).getSymbol(), quantity);
 
         if (DEBUG) Log.d(TAG, "Newly created stock = " + newStock);
 

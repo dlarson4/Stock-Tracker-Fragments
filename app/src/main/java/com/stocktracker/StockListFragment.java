@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
@@ -37,7 +36,7 @@ import static com.stocktracker.BuildConfig.DEBUG;
 
 public class StockListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, StockLoader.StockLoaderCallback, ActionBarCallback.ActionBarListener {
 
-    static final String TAG = StockListFragment.class.getSimpleName();
+    private static final String TAG = StockListFragment.class.getSimpleName();
     private static final int LOADER_ID = 0;
 
     private static final String FRAGMENT_LIST_KEY = "fragmentListKey";
@@ -50,7 +49,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     private StockLoader mLoaderCallback = null;
 
     private android.view.ActionMode mActionMode;
-    private ActionBarCallback mActionModeCallback = new ActionBarCallback(this);
+    private final ActionBarCallback mActionModeCallback = new ActionBarCallback(this);
 
     // implementation of Handler, used to load stock quote data from web service
     private Handler downloadHandler = null;
@@ -227,9 +226,9 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
      * <p/>
      * groups.google.com/forum/#!msg/android-developers/1aPZXZG6kWk/lIYDavGYn5UJ
      */
-    private class StockDownloadHandler extends Handler {
+    private static class StockDownloadHandler extends Handler {
         // Allows Fragment to be garbage collected properly
-        private WeakReference<StockListFragment> mFragment;
+        private final WeakReference<StockListFragment> mFragment;
 
         public StockDownloadHandler(StockListFragment activity) {
             mFragment = new WeakReference<>(activity);
@@ -246,9 +245,11 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
 
             QuoteResponse quoteResponse = DownloadIntentService.getQuoteResponse(message);
 
-            hideSwipeProgress();
-            fragment.updateStockListDone(quoteResponse);
-            enableSwipe();
+            if(mFragment.get() != null) {
+                mFragment.get().hideSwipeProgress();
+                fragment.updateStockListDone(quoteResponse);
+                mFragment.get().enableSwipe();
+            }
         }
     }
 
