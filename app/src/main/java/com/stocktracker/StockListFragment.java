@@ -39,9 +39,6 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     private static final String TAG = StockListFragment.class.getSimpleName();
     private static final int LOADER_ID = 0;
 
-    private static final String FRAGMENT_LIST_KEY = "fragmentListKey";
-    private static final String STOCK_LIST_KEY = "stockListKey";
-
     private SwipeRefreshLayout mRefreshLayout;
     private RecyclerView mRecyclerView;
 
@@ -245,11 +242,9 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
 
             QuoteResponse quoteResponse = DownloadIntentService.getQuoteResponse(message);
 
-            if(mFragment.get() != null) {
-                mFragment.get().hideSwipeProgress();
-                fragment.updateStockListDone(quoteResponse);
-                mFragment.get().enableSwipe();
-            }
+            mFragment.get().hideSwipeProgress();
+            mFragment.get().updateStockListDone(quoteResponse);
+            mFragment.get().enableSwipe();
         }
     }
 
