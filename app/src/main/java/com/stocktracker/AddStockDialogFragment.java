@@ -130,7 +130,7 @@ public class AddStockDialogFragment extends DialogFragment {
      */
     private static class StockDownloadHandler extends Handler {
         // Allows Fragment to be garbage collected properly
-        private WeakReference<AddStockDialogFragment> mFragment;
+        private final WeakReference<AddStockDialogFragment> mFragment;
 
         public StockDownloadHandler(AddStockDialogFragment activity) {
             mFragment = new WeakReference<>(activity);
@@ -155,7 +155,7 @@ public class AddStockDialogFragment extends DialogFragment {
         }
     }
 
-    public void addStockDone(QuoteResponse quoteResponse, String ticker, double quantity) {
+    private void addStockDone(QuoteResponse quoteResponse, String ticker, double quantity) {
         if (Utils.isValidStock(quoteResponse)) {
             if (DEBUG) Log.d(TAG, "New stock " + ticker + " verified.");
             mCallback.saveNewStock(quoteResponse, quantity);

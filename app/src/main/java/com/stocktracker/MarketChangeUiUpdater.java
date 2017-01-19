@@ -37,9 +37,9 @@ public class MarketChangeUiUpdater {
             final TextView totalMarketChangePercentView = (TextView)mActivity.findViewById(R.id.totalMarketChangePercent);
 
             LayoutInflater layoutInflater = LayoutInflater.from(mActivity);
-            int changeColor = layoutInflater.getContext().getResources().getColor(R.color.green);
+            int changeColor = layoutInflater.getContext().getResources().getColor(R.color.green, mActivity.getTheme());
             if (changeType == FormatUtils.ChangeType.Negative) {
-                changeColor = layoutInflater.getContext().getResources().getColor(R.color.red);
+                changeColor = layoutInflater.getContext().getResources().getColor(R.color.red, mActivity.getTheme());
             }
 
             // change amount

@@ -2,14 +2,12 @@ package com.stocktracker;
 
 import android.app.DialogFragment;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import com.stocktracker.data.Quote;
@@ -42,23 +40,15 @@ public class StockTrackerActivity extends AppCompatActivity
             supportActionBar.setDisplayHomeAsUpEnabled(false);
         }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addStock();
-            }
-        });
-
         if (savedInstanceState == null) {
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            StockListFragment fragment = new StockListFragment();
-            transaction.replace(R.id.fragmentContainer, fragment);
+            transaction.replace(R.id.fragmentContainer, StockListFragment.newInstance());
             transaction.commit();
         }
     }
 
-    private void addStock() {
+    @Override
+    public void addStock() {
         mAddStockDialog = new AddStockDialogFragment();
         mAddStockDialog.show(getFragmentManager(), AddStockDialogFragment.TAG);
     }
@@ -115,11 +105,7 @@ public class StockTrackerActivity extends AppCompatActivity
 
     @Override
     public void editStock(Quote quote) {
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(EditQuantityDialogFragment.QUOTE_ARG, quote);
-
-        EditQuantityDialogFragment editQuantityDialogFragment = new EditQuantityDialogFragment();
-        editQuantityDialogFragment.setArguments(bundle);
+        EditQuantityDialogFragment editQuantityDialogFragment = EditQuantityDialogFragment.newInstance(quote);
         editQuantityDialogFragment.show(getFragmentManager(), EditQuantityDialogFragment.TAG);
     }
 

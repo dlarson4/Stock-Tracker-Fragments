@@ -6,8 +6,8 @@ android {
 
     defaultConfig {
         applicationId "com.stocktracker.material2"
-        minSdkVersion 22
-        targetSdkVersion 22
+        minSdkVersion 23
+        targetSdkVersion 23
         versionCode 1
         versionName "1.0"
     }
@@ -38,4 +38,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:23.1.0'
 
     compile 'org.apache.commons:commons-lang3:3.4'
+
+    compile 'com.jakewharton:butterknife:8.4.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
 }

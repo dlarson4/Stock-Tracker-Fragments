@@ -24,14 +24,21 @@ import static com.stocktracker.BuildConfig.DEBUG;
  */
 public class EditQuantityDialogFragment extends DialogFragment {
     public final static String TAG = EditQuantityDialogFragment.class.getSimpleName();
-    public final static String QUOTE_ARG = "quote";
+    private final static String QUOTE_ARG = "quote";
 
     private EditStockListener mCallback;
 
-    private TextView mTickerSymbolTextView;
     private EditText mQuantityEditText;
     private Quote mQuote;
-    private TextView mStockNameTextView;
+
+    public static EditQuantityDialogFragment newInstance(Quote quote) {
+        EditQuantityDialogFragment fragment = new EditQuantityDialogFragment();
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(EditQuantityDialogFragment.QUOTE_ARG, quote);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,8 +54,8 @@ public class EditQuantityDialogFragment extends DialogFragment {
         final LayoutInflater inflater = getActivity().getLayoutInflater();
 
         final View view = inflater.inflate(R.layout.edit_stock_quantity, null);
-        mTickerSymbolTextView = (TextView) view.findViewById(R.id.stockTicker);
-        mStockNameTextView = (TextView)view.findViewById(R.id.stockName);
+        TextView mTickerSymbolTextView = (TextView) view.findViewById(R.id.stockTicker);
+        TextView mStockNameTextView = (TextView) view.findViewById(R.id.stockName);
         mQuantityEditText = (EditText) view.findViewById(R.id.stockQuantity);
 
         mTickerSymbolTextView.setText(mQuote.getSymbol());

@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,7 +21,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
 
 import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
@@ -32,6 +33,9 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static com.stocktracker.BuildConfig.DEBUG;
 
 public class StockListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, StockLoader.StockLoaderCallback, ActionBarCallback.ActionBarListener {
@@ -39,8 +43,14 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     private static final String TAG = StockListFragment.class.getSimpleName();
     private static final int LOADER_ID = 0;
 
-    private SwipeRefreshLayout mRefreshLayout;
-    private RecyclerView mRecyclerView;
+    @BindView(R.id.swipe)
+    public SwipeRefreshLayout mRefreshLayout;
+
+    @BindView(R.id.recyclerview)
+    public RecyclerView mRecyclerView;
+
+    @BindView(R.id.fab)
+    public FloatingActionButton fab;
 
     // implementation of LoaderManager.LoaderCallbacks, used to load stocks from the database
     private StockLoader mLoaderCallback = null;
@@ -62,10 +72,17 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     private StockListListener mCallback;
 
     interface StockListListener {
+        void addStock();
         void editStock(Quote quote);
         void deleteStock(String symbol, long id);
         void viewStockDetails(Quote quote, long id);
     }
+
+    public static StockListFragment newInstance() {
+        StockListFragment stockListFragment = new StockListFragment();
+        return stockListFragment;
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -90,8 +107,9 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        RelativeLayout relativeLayout = (RelativeLayout) inflater.inflate(R.layout.stock_fragment_list, container, false);
-        mRecyclerView = (RecyclerView) relativeLayout.findViewById(R.id.recyclerview);
+        CoordinatorLayout layout = (CoordinatorLayout) inflater.inflate(R.layout.stock_fragment_list, container, false);
+        ButterKnife.bind(this, layout);
+
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
@@ -99,7 +117,6 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
         final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), mQuoteList);
         mRecyclerView.setAdapter(mStockAdapter);
 
-        mRefreshLayout = (SwipeRefreshLayout) relativeLayout.findViewById(R.id.swipe);
         mRefreshLayout.setOnRefreshListener(this);
         mRecyclerView.setLongClickable(true);
 
@@ -126,7 +143,14 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
             }
         }));
 
-        return relativeLayout;
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mCallback.addStock();
+            }
+        });
+
+        return layout;
     }
 
     @Override
