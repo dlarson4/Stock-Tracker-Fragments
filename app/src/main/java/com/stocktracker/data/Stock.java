@@ -3,9 +3,6 @@ package com.stocktracker.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 public class Stock implements Parcelable
 {
     private long id;
@@ -42,18 +39,42 @@ public class Stock implements Parcelable
     }
 
     @Override
-    public String toString()
-    {
-        return ToStringBuilder.reflectionToString(this);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Stock stock = (Stock) o;
+
+        if (id != stock.id) return false;
+        if (Double.compare(stock.quantity, quantity) != 0) return false;
+        if (dateCreatedMillis != stock.dateCreatedMillis) return false;
+        return symbol != null ? symbol.equals(stock.symbol) : stock.symbol == null;
+
     }
 
     @Override
-    public int hashCode()
-    {
-        return HashCodeBuilder.reflectionHashCode(this);
+    public int hashCode() {
+        int result;
+        long temp;
+        result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (symbol != null ? symbol.hashCode() : 0);
+        temp = Double.doubleToLongBits(quantity);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (int) (dateCreatedMillis ^ (dateCreatedMillis >>> 32));
+        return result;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Stock{");
+        sb.append("id=").append(id);
+        sb.append(", symbol='").append(symbol).append('\'');
+        sb.append(", quantity=").append(quantity);
+        sb.append(", dateCreatedMillis=").append(dateCreatedMillis);
+        sb.append('}');
+        return sb.toString();
+    }
+
     @Override
     public int describeContents()
     {

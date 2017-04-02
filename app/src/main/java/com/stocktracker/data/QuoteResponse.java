@@ -3,8 +3,6 @@ package com.stocktracker.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 import java.util.Date;
 import java.util.List;
 
@@ -60,9 +58,14 @@ public class QuoteResponse implements Parcelable
     }
 
     @Override
-    public String toString()
-    {
-        return ToStringBuilder.reflectionToString(this);
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("QuoteResponse{");
+        sb.append("count=").append(count);
+        sb.append(", created=").append(created);
+        sb.append(", lang='").append(lang).append('\'');
+        sb.append(", quotes=").append(quotes);
+        sb.append('}');
+        return sb.toString();
     }
 
     @Override

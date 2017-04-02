@@ -1,7 +1,5 @@
 package com.stocktracker.http;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 public class HttpTaskResponse
 {
     public static int HTTP_OK = 200;
@@ -56,8 +54,11 @@ public class HttpTaskResponse
     }
 
     @Override
-    public String toString()
-    {
-        return ToStringBuilder.reflectionToString(this);
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("HttpTaskResponse{");
+        sb.append("status=").append(status);
+        sb.append(", data='").append(data).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }
