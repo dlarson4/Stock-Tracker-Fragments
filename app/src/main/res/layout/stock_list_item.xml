@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:gravity="center_vertical"
+              android:background="@drawable/selector_row"
+              android:orientation="horizontal"
+              android:paddingBottom="8dp"
+              android:paddingLeft="16dp"
+              android:paddingRight="16dp"
+              android:paddingTop="8dp"
+              android:baselineAligned="false">
+
+    <RelativeLayout
+        android:id="@+id/stock_symbol_and_name_layout"
+        android:layout_width="0px"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="3">
+
+        <TextView
+            android:id="@+id/stockSymbol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="swppx"
+            android:textAllCaps="true"
+            android:textSize="@dimen/stock_title_font_size"/>
+
+        <TextView
+            android:id="@+id/stockName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/stockSymbol"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Schwab S&amp;P 500 Index"
+            android:textSize="@dimen/stock_subhead_size"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/stock_price_layout"
+        android:layout_width="0px"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:layout_weight="2"
+        android:paddingLeft="16dp">
+
+        <TextView
+            android:id="@+id/stockPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:singleLine="true"
+            android:text="$ 335.7"
+            android:textSize="@dimen/stock_title_font_size"/>
+
+        <TextView
+            android:id="@+id/stock_price_textview_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/stockPrice"
+            android:layout_centerHorizontal="true"
+            android:text=""
+            android:textSize="@dimen/stock_subhead_size"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/stock_change_layout"
+        android:layout_width="0px"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:layout_weight="2"
+        android:gravity="center_vertical|center_horizontal"
+        android:paddingLeft="16dp">
+
+        <TextView
+            android:id="@+id/stockChange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="-3.45"
+            android:textSize="@dimen/stock_title_font_size"/>
+
+        <TextView
+            android:id="@+id/stockChangePercentage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/stockChange"
+            android:layout_centerHorizontal="true"
+            android:text="(1.23)"
+            android:textSize="@dimen/stock_subhead_size"/>
+    </RelativeLayout>
+
+</LinearLayout>

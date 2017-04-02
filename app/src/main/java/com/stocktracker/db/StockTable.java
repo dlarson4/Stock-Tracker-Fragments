@@ -1,11 +1,12 @@
 package com.stocktracker.db;
 
-import com.stocktracker.log.Logger;
-
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import static com.stocktracker.BuildConfig.DEBUG;
 
 public class StockTable {
-    private final static String CLASS_NAME = StockTable.class.getSimpleName();
+    private final static String TAG = StockTable.class.getSimpleName();
 
     public static final String STOCK_TABLE_NAME = "stock";
 
@@ -25,18 +26,15 @@ public class StockTable {
             COLUMN_DATE_CREATED + " numeric not null" +
             ");";
 
+
     public static void onCreate(SQLiteDatabase database) {
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Creating SQLLite database as '%s'.", CLASS_NAME, "onCreate", DATABASE_CREATE);
-        }
+        if (DEBUG) Log.d(TAG, "Creating SQLLite database as " + DATABASE_CREATE);
 
         database.execSQL(DATABASE_CREATE);
     }
 
     public static void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Upgrading database from version %d to %d", CLASS_NAME, "onUpgrade");
-        }
+        if (DEBUG) Log.d(TAG, "Upgrading database from version %d to %d");
 
 //        database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 //        onCreate(database);

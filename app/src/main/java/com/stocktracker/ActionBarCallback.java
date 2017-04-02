@@ -5,16 +5,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-public class ActionBarCallback implements ActionMode.Callback {
+public class ActionBarCallback implements android.view.ActionMode.Callback {
     private ActionBarListener listener;
-
-    static interface ActionBarListener {
+    
+    interface ActionBarListener {
         void onDestroyActionMode(ActionMode mode);
-
         void onActionItemClicked(MenuItem item);
     }
 
-    public ActionBarCallback(ActionBarListener listener) {
+    public ActionBarCallback(ActionBarListener listener)
+    {
         this.listener = listener;
     }
 

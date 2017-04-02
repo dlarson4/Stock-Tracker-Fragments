@@ -1,29 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <resources>
 
-    <!--
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    -->
-    <style name="AppBaseTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-        <!--
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        -->
+    <style name="Theme.DesignDemo" parent="Base.Theme.DesignDemo">
     </style>
 
-    <!-- Application theme. -->
-    <style name="AppTheme" parent="AppBaseTheme">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    <style name="Base.Theme.DesignDemo" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="colorPrimary">#3F51B5</item>
+        <item name="colorPrimaryDark">#303F9F</item>
+        <item name="colorAccent">#FF4081</item>
+        <item name="android:windowBackground">@color/window_background</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
-    <style name="ColumnHeading" parent="AppBaseTheme">
-        <item name="android:textSize">@dimen/stock_row_font_size</item>
-        <item name="android:textStyle">bold</item>
-        <item name="android:shadowColor">@color/text_shadow_white</item>
-        <item name="android:shadowDx">-2</item>
-        <item name="android:shadowDy">-2</item>
-        <item name="android:shadowRadius">1</item>
+    <style name="EditQuantityStockTicker" parent="Theme.DesignDemo">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:layout_marginLeft">24dp</item>
+        <item name="android:layout_marginTop">20dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
     </style>
-    
+
+    <style name="EditQuantityTextView" parent="Theme.DesignDemo">
+        <!--<item name="android:textSize"></item>-->
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:layout_marginLeft">24dp</item>
+        <item name="android:layout_marginTop">12dp</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
 </resources>

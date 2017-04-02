@@ -1,16 +1,18 @@
 package com.stocktracker.db;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 import com.stocktracker.contentprovider.StockContract;
 import com.stocktracker.data.Stock;
-import com.stocktracker.log.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.stocktracker.BuildConfig.DEBUG;
 
 /**
  * Facade for the content provider defined in <code>StockContract</code>
@@ -18,7 +20,7 @@ import com.stocktracker.log.Logger;
  * @author dlarson
  */
 public class StockContentProviderFacade {
-    private final static String CLASS_NAME = StockContentProviderFacade.class.getSimpleName();
+    private final static String TAG = StockContentProviderFacade.class.getSimpleName();
 
     private Context context;
 
@@ -27,6 +29,7 @@ public class StockContentProviderFacade {
     }
 
     public Stock insert(String stock, double quantity) {
+        if (DEBUG) Log.d(TAG, "insert");
         ContentValues values = new ContentValues();
         values.put(StockTable.COLUMN_STOCK, stock);
         values.put(StockTable.COLUMN_QUANTITY, quantity);
@@ -34,21 +37,19 @@ public class StockContentProviderFacade {
 
         final Uri uri = StockContract.CONTENT_URI;
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Uri for content provider = '%s'", CLASS_NAME, "insert", uri);
-        }
+        if (DEBUG) Log.d(TAG, "Uri for content provider = " + uri);
 
         Uri newRowUri = context.getContentResolver().insert(uri, values);
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: newRowUri = '%s'", CLASS_NAME, "insert", newRowUri);
-        }
+        if (DEBUG) Log.d(TAG, "newRowUri = " + newRowUri);
 
-        Cursor cursor = context.getContentResolver().query(newRowUri, StockTable.ALL_COLUMNS, null, null, null);
-        if (cursor != null && cursor.moveToFirst()) {
-            Stock newStock = createStock(cursor);
-            close(cursor);
-            return newStock;
+        if(newRowUri != null) {
+            Cursor cursor = context.getContentResolver().query(newRowUri, StockTable.ALL_COLUMNS, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                Stock newStock = createStock(cursor);
+                close(cursor);
+                return newStock;
+            }
         }
 
         return null;
@@ -57,38 +58,28 @@ public class StockContentProviderFacade {
     public int delete(long id) {
         final Uri uri = Uri.parse(StockContract.CONTENT_URI.toString() + "/" + id);
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Uri for content provider = '%s'", CLASS_NAME, "delete", uri);
-        }
+        if (DEBUG) Log.d(TAG, "Uri for content provider = " + uri);
 
         int rowsDeleted = context.getContentResolver().delete(uri, null, null);
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: rowsDeleted = '%d'", CLASS_NAME, "delete", rowsDeleted);
-        }
+        if (DEBUG) Log.d(TAG, "rowsDeleted = " + rowsDeleted);
 
         return rowsDeleted;
     }
 
     public boolean isDuplicate(String stock) {
         final String[] projection = {StockTable.COLUMN_STOCK};
-        final String selection = StockTable.COLUMN_STOCK + " = UPPER(?)";
+        final String selectionClause = StockTable.COLUMN_STOCK + " = ?";
         final String[] selectionArgs = {stock};
 
         final Uri uri = StockContract.CONTENT_URI;
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Uri for content provider = '%s'", CLASS_NAME, "isDuplicate", uri);
-        }
+        if (DEBUG) Log.d(TAG, "Uri for content provider = " + uri);
 
         Cursor cursor = null;
         try {
-            if (Logger.isLoggingEnabled()) {
-                Logger.debug("%s.%s: About to get cursor", CLASS_NAME, "isDuplicate");
-            }
-
-            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
-
+            if (DEBUG) Log.d(TAG, "About to get cursor");
+            cursor = context.getContentResolver().query(uri, projection, selectionClause, selectionArgs, null);
             return (cursor != null && cursor.moveToFirst());
         } finally {
             close(cursor);
@@ -96,20 +87,17 @@ public class StockContentProviderFacade {
     }
 
     public List<Stock> getStocks() {
-        List<Stock> list = new ArrayList<Stock>();
+        List<Stock> list = new ArrayList<>();
 
         final String[] projection = StockTable.ALL_COLUMNS;
         final Uri uri = StockContract.CONTENT_URI;
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Uri for content provider = '%s'", CLASS_NAME, "getStocks", uri);
-        }
+        if (DEBUG) Log.d(TAG, "Uri for content provider = " + uri);
+
 
         Cursor cursor = null;
         try {
-            if (Logger.isLoggingEnabled()) {
-                Logger.debug("%s.%s: About to get cursor", CLASS_NAME, "getStocks");
-            }
+            if (DEBUG) Log.d(TAG, "About to get cursor");
 
             cursor = context.getContentResolver().query(uri, projection, null, null, StockTable.COLUMN_STOCK);
 
@@ -146,9 +134,7 @@ public class StockContentProviderFacade {
 
         final Uri uri = Uri.parse(StockContract.CONTENT_URI.toString() + "/" + id);
 
-        if (Logger.isLoggingEnabled()) {
-            Logger.debug("%s.%s: Uri for content provider = '%s'", CLASS_NAME, "update", uri);
-        }
+        if (DEBUG) Log.d(TAG, "Uri for content provider = " + uri);
 
         int rowsUpdated = context.getContentResolver().update(uri, values, null, null);
         return rowsUpdated;
