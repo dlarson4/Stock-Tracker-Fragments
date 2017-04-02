@@ -1,2 +1,7 @@
 /build
 app.iml
+compier.xml
+gradle.xml
+misc.xml
+vcs.xml
+.idea

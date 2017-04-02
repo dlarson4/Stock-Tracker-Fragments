@@ -5,4 +5,7 @@
 .DS_Store
 /build
 /captures
-gradlew
+.app.iml
+app/app.iml
+.idea
+Stock-Tracker-Fragments.iml
