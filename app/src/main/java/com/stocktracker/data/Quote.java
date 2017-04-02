@@ -3,9 +3,6 @@ package com.stocktracker.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 public class Quote implements Parcelable
 {
     private String symbol;
@@ -183,15 +180,76 @@ public class Quote implements Parcelable
     }
 
     @Override
-    public String toString()
-    {
-        return ToStringBuilder.reflectionToString(this);
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Quote{");
+        sb.append("symbol='").append(symbol).append('\'');
+        sb.append(", averageDailyVolume='").append(averageDailyVolume).append('\'');
+        sb.append(", change='").append(change).append('\'');
+        sb.append(", daysLow='").append(daysLow).append('\'');
+        sb.append(", daysHigh='").append(daysHigh).append('\'');
+        sb.append(", yearLow='").append(yearLow).append('\'');
+        sb.append(", yearHigh='").append(yearHigh).append('\'');
+        sb.append(", marketCapitalization='").append(marketCapitalization).append('\'');
+        sb.append(", lastTradePriceOnly='").append(lastTradePriceOnly).append('\'');
+        sb.append(", daysRange='").append(daysRange).append('\'');
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", volume='").append(volume).append('\'');
+        sb.append(", stockExchange='").append(stockExchange).append('\'');
+        sb.append(", quantity=").append(quantity);
+        sb.append(", id=").append(id);
+        sb.append('}');
+        return sb.toString();
     }
 
     @Override
-    public int hashCode()
-    {
-        return HashCodeBuilder.reflectionHashCode(this);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Quote quote = (Quote) o;
+
+        if (Double.compare(quote.quantity, quantity) != 0) return false;
+        if (id != quote.id) return false;
+        if (symbol != null ? !symbol.equals(quote.symbol) : quote.symbol != null) return false;
+        if (averageDailyVolume != null ? !averageDailyVolume.equals(quote.averageDailyVolume) : quote.averageDailyVolume != null)
+            return false;
+        if (change != null ? !change.equals(quote.change) : quote.change != null) return false;
+        if (daysLow != null ? !daysLow.equals(quote.daysLow) : quote.daysLow != null) return false;
+        if (daysHigh != null ? !daysHigh.equals(quote.daysHigh) : quote.daysHigh != null) return false;
+        if (yearLow != null ? !yearLow.equals(quote.yearLow) : quote.yearLow != null) return false;
+        if (yearHigh != null ? !yearHigh.equals(quote.yearHigh) : quote.yearHigh != null) return false;
+        if (marketCapitalization != null ? !marketCapitalization.equals(quote.marketCapitalization) : quote.marketCapitalization != null)
+            return false;
+        if (lastTradePriceOnly != null ? !lastTradePriceOnly.equals(quote.lastTradePriceOnly) : quote.lastTradePriceOnly != null)
+            return false;
+        if (daysRange != null ? !daysRange.equals(quote.daysRange) : quote.daysRange != null) return false;
+        if (name != null ? !name.equals(quote.name) : quote.name != null) return false;
+        if (volume != null ? !volume.equals(quote.volume) : quote.volume != null) return false;
+        return stockExchange != null ? stockExchange.equals(quote.stockExchange) : quote.stockExchange == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        long temp;
+        result = symbol != null ? symbol.hashCode() : 0;
+        result = 31 * result + (averageDailyVolume != null ? averageDailyVolume.hashCode() : 0);
+        result = 31 * result + (change != null ? change.hashCode() : 0);
+        result = 31 * result + (daysLow != null ? daysLow.hashCode() : 0);
+        result = 31 * result + (daysHigh != null ? daysHigh.hashCode() : 0);
+        result = 31 * result + (yearLow != null ? yearLow.hashCode() : 0);
+        result = 31 * result + (yearHigh != null ? yearHigh.hashCode() : 0);
+        result = 31 * result + (marketCapitalization != null ? marketCapitalization.hashCode() : 0);
+        result = 31 * result + (lastTradePriceOnly != null ? lastTradePriceOnly.hashCode() : 0);
+        result = 31 * result + (daysRange != null ? daysRange.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (volume != null ? volume.hashCode() : 0);
+        result = 31 * result + (stockExchange != null ? stockExchange.hashCode() : 0);
+        temp = Double.doubleToLongBits(quantity);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        result = 31 * result + (int) (id ^ (id >>> 32));
+        return result;
     }
 
     @Override
