@@ -24,8 +24,8 @@
             android:exported="false"/>
 
         <provider
-            android:name=".contentprovider.material.StockContentProvider"
-            android:authorities="com.stocktracker.material.contentprovider"
+            android:name=".contentprovider.StockContentProvider"
+            android:authorities="com.stocktracker.contentprovider"
             android:exported="false">
         </provider>
 

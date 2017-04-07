@@ -5,7 +5,7 @@ import android.net.Uri;
 
 public final class StockContract
 {
-    public static final String AUTHORITY = "com.stocktracker.material.contentprovider";
+    public static final String AUTHORITY = "com.stocktracker.contentprovider";
     
     public static final String BASE_PATH = "stocks";
     

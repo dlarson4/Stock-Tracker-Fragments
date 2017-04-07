@@ -1,4 +1,4 @@
-package com.stocktracker.contentprovider.material;
+package com.stocktracker.contentprovider;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.stocktracker.contentprovider.StockContract;
 import com.stocktracker.db.StockDatabaseHelper;
 import com.stocktracker.db.StockTable;
 
