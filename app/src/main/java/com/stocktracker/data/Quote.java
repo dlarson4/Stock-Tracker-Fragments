@@ -25,8 +25,7 @@ public class Quote implements Parcelable
     // SQLite id
     private long id;
     
-    public Quote()
-    {
+    private Quote() {
     }
     
     public String getSymbol()
@@ -204,7 +203,6 @@ public class Quote implements Parcelable
         if (name != null ? !name.equals(quote.name) : quote.name != null) return false;
         if (volume != null ? !volume.equals(quote.volume) : quote.volume != null) return false;
         return stockExchange != null ? stockExchange.equals(quote.stockExchange) : quote.stockExchange == null;
-
     }
 
     @Override
@@ -311,95 +309,106 @@ public class Quote implements Parcelable
     }
 
 
-    public static class QuoteBuilder {
+    public static class Builder {
         private String symbol;
         private String name;
         private String change;
+        private String averageDailyVolume;
         private String daysLow;
         private String daysHigh;
         private String yearLow;
         private String yearHigh;
         private String lastTradePriceOnly;
         private String daysRange;
+        private String marketCapitalization;
+        private String volume;
+
         private String stockExchange;
         // populated from the database, not the web service
         private double quantity;
         // SQLite id
         private long id;
 
-        private QuoteBuilder() {
-        }
-
-        public static QuoteBuilder aQuote() {
-            return new QuoteBuilder();
-        }
-        public QuoteBuilder symbol(String symbol) {
+        public Builder symbol(String symbol) {
             this.symbol = symbol;
             return this;
         }
 
-        public QuoteBuilder name(String name) {
+        public Builder name(String name) {
             this.name = name;
             return this;
         }
 
-        public QuoteBuilder change(String change) {
+        public Builder change(String change) {
             this.change = change;
             return this;
         }
 
-        public QuoteBuilder daysLow(String daysLow) {
+        public Builder daysLow(String daysLow) {
             this.daysLow = daysLow;
             return this;
         }
 
-        public QuoteBuilder daysHigh(String daysHigh) {
+        public Builder daysHigh(String daysHigh) {
             this.daysHigh = daysHigh;
             return this;
         }
 
-        public QuoteBuilder yearLow(String yearLow) {
+        public Builder yearLow(String yearLow) {
             this.yearLow = yearLow;
             return this;
         }
 
-        public QuoteBuilder yearHigh(String yearHigh) {
+        public Builder yearHigh(String yearHigh) {
             this.yearHigh = yearHigh;
             return this;
         }
 
-        public QuoteBuilder lastTradePriceOnly(String lastTradePriceOnly) {
+        public Builder lastTradePriceOnly(String lastTradePriceOnly) {
             this.lastTradePriceOnly = lastTradePriceOnly;
             return this;
         }
 
-        public QuoteBuilder daysRange(String daysRange) {
+        public Builder daysRange(String daysRange) {
             this.daysRange = daysRange;
             return this;
         }
 
-        public QuoteBuilder stockExchange(String stockExchange) {
+        public Builder stockExchange(String stockExchange) {
             this.stockExchange = stockExchange;
             return this;
         }
 
-        public QuoteBuilder quantity(double quantity) {
+        public Builder quantity(double quantity) {
             this.quantity = quantity;
             return this;
         }
 
-        public QuoteBuilder id(long id) {
+        public Builder id(long id) {
             this.id = id;
             return this;
         }
 
-//        public QuoteBuilder but() {
-//            return aQuote().change(change).daysLow(daysLow).daysHigh(daysHigh).yearLow(yearLow).yearHigh(yearHigh).lastTradePriceOnly(mlastTradePriceOnly).daysRange(mdaysRange).stockExchange(mstockExchange).quantity(mquantity).id(mid);
-//        }
+        public Builder averageDailyVolume(String averageDailyVolume) {
+            this.averageDailyVolume = averageDailyVolume;
+            return this;
+        }
+
+        public Builder marketCapitalization(String marketCapitalization) {
+            this.marketCapitalization = marketCapitalization;
+            return this;
+        }
+
+        public Builder volume(String volume) {
+            this.volume = volume;
+            return this;
+        }
+
 
         public Quote build() {
             Quote quote = new Quote();
             quote.setChange(change);
+            quote.setAverageDailyVolume(averageDailyVolume);
             quote.setDaysLow(daysLow);
             quote.setDaysHigh(daysHigh);
             quote.setYearLow(yearLow);
@@ -411,6 +420,8 @@ public class Quote implements Parcelable
             quote.setId(id);
             quote.setSymbol(symbol);
             quote.setName(name);
+            quote.setMarketCapitalization(marketCapitalization);
+            quote.setVolume(volume);
             return quote;
         }
     }

@@ -97,8 +97,7 @@ public class DownloadIntentService extends IntentService {
             json = new JSONObject(response.getData());
             log(json);
 
-            QuoteResponseStrategy parser = new QuoteResponseStrategy();
-            quoteResponse = parser.parse(json);
+            quoteResponse = new QuoteResponseStrategy().parse(json);
 
             if (DEBUG) Log.d(TAG, "Parsed JSON = " + String.valueOf(quoteResponse));
 
