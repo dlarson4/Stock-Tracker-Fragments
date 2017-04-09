@@ -21,51 +21,36 @@ import java.util.List;
 public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> {
     private static final String TAG = StockAdapter.class.getSimpleName();
 
-    private List<Quote> mQuotes;
+    private List<Quote> quotes;
 
-    private final LayoutInflater mInflater;
-    private final WeakReference<Context> mContext;
+    private final LayoutInflater layoutInflater;
+    private final WeakReference<Context> context;
 
     public StockAdapter(Context context, List<Quote> quotes) {
-        mContext = new WeakReference<>(context);
-        mQuotes = quotes;
-        mInflater = LayoutInflater.from(context);
+        this.context = new WeakReference<>(context);
+        this.quotes = quotes;
+        layoutInflater = LayoutInflater.from(context);
 
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.selectableItemBackground, typedValue, true);
-        int background = typedValue.resourceId;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        View view = mInflater.inflate(R.layout.stock_list_item, viewGroup, false);
+        View view = layoutInflater.inflate(R.layout.stock_list_item, viewGroup, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        final Quote quote = mQuotes.get(position);
+        final Quote quote = quotes.get(position);
 
         holder.getStockSymbol().setText(quote.getSymbol());
 
-        int changeColor;
-        if(Utils.hasMarshmallow()) {
-            changeColor = mInflater.getContext().getResources().getColor(R.color.green, mContext.get().getTheme());
-        } else {
-            changeColor = mInflater.getContext().getResources().getColor(R.color.green);
-        }
-
+        int changeColor = getChangeColor(quote);
         final FormatUtils.ChangeType changeType = FormatUtils.getChangeType(quote.getChange());
-        final String changeSymbol = FormatUtils.getChangeSymbol(mInflater.getContext(), changeType);
-
-        if (changeType == FormatUtils.ChangeType.Negative) {
-            if(Utils.hasMarshmallow()) {
-                changeColor = mInflater.getContext().getResources().getColor(R.color.red, mContext.get().getTheme());
-            } else {
-                changeColor = mInflater.getContext().getResources().getColor(R.color.red);
-            }
-        }
+        final String changeSymbol = FormatUtils.getChangeSymbol(layoutInflater.getContext(), changeType);
 
         holder.getStockSymbol().setText(quote.getSymbol());
         holder.getStockName().setText(quote.getName());
@@ -86,7 +71,27 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        return mQuotes.size();
+        return quotes.size();
+    }
+
+    private int getChangeColor(Quote quote) {
+        int changeColor;
+        final FormatUtils.ChangeType changeType = FormatUtils.getChangeType(quote.getChange());
+
+        if (changeType == FormatUtils.ChangeType.Negative) {
+            if(Utils.hasMarshmallow()) {
+                changeColor = layoutInflater.getContext().getResources().getColor(R.color.red, context.get().getTheme());
+            } else {
+                changeColor = layoutInflater.getContext().getResources().getColor(R.color.red);
+            }
+        } else {
+            if(Utils.hasMarshmallow()) {
+                changeColor = layoutInflater.getContext().getResources().getColor(R.color.green, context.get().getTheme());
+            } else {
+                changeColor = layoutInflater.getContext().getResources().getColor(R.color.green);
+            }
+        }
+        return changeColor;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

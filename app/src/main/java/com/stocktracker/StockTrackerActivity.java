@@ -21,16 +21,16 @@ public class StockTrackerActivity extends AppCompatActivity
         implements AddStockDialogFragment.AddStockDialogListener, StockListFragment.StockListListener, EditQuantityDialogFragment.EditStockListener {
     private final static String TAG = StockTrackerActivity.class.getSimpleName();
 
-    private DialogFragment mAddStockDialog;
+    private DialogFragment addStockDialog;
 
-    private StockContentProviderFacade mDao;
+    private StockContentProviderFacade dao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stock_tracker);
 
-        mDao = new StockContentProviderFacade(this);
+        dao = new StockContentProviderFacade(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -49,16 +49,16 @@ public class StockTrackerActivity extends AppCompatActivity
 
     @Override
     public void addStock() {
-        mAddStockDialog = new AddStockDialogFragment();
-        mAddStockDialog.show(getFragmentManager(), AddStockDialogFragment.TAG);
+        addStockDialog = new AddStockDialogFragment();
+        addStockDialog.show(getFragmentManager(), AddStockDialogFragment.TAG);
     }
 
     @Override
     public void saveNewStock(QuoteResponse quoteResponse, double quantity) {
         if (DEBUG) Log.d(TAG, "saveNewStock");
 
-        if (mAddStockDialog != null) {
-            mAddStockDialog.dismiss();
+        if (addStockDialog != null) {
+            addStockDialog.dismiss();
         }
 
         if (DEBUG) Log.d(TAG, "Saving new stock");
@@ -74,7 +74,7 @@ public class StockTrackerActivity extends AppCompatActivity
     private void insertStockSymbol(QuoteResponse parsed, double quantity) {
         if (DEBUG) Log.d(TAG, "Inserting new stock, QuoteResponse = " + parsed);
 
-        Stock newStock = mDao.insert(parsed.getQuotes().get(0).getSymbol(), quantity);
+        Stock newStock = dao.insert(parsed.getQuotes().get(0).getSymbol(), quantity);
 
         if (DEBUG) Log.d(TAG, "Newly created stock = " + newStock);
 
@@ -112,7 +112,7 @@ public class StockTrackerActivity extends AppCompatActivity
     @Override
     public void deleteStock(String symbol, long id) {
         if (DEBUG) Log.d(TAG, "deleteStock, symbol = " + symbol + ", id = " + id);
-        mDao.delete(id); // TODO should be made asynchronous
+        dao.delete(id); // TODO should be made asynchronous
         updateStockList();
     }
 
@@ -124,7 +124,7 @@ public class StockTrackerActivity extends AppCompatActivity
     @Override
     public void updateStockQuantity(String symbol, double quantity, long id) {
         if (DEBUG) Log.d(TAG, "updateStockQuantity, symbol = " + symbol + ", id = " + id + ", quantity " + quantity);
-        mDao.update(id, quantity); // TODO should be made asynchronous
+        dao.update(id, quantity); // TODO should be made asynchronous
         updateStockList();
     }
 }

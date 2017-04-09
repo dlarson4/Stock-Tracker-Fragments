@@ -38,38 +38,42 @@ import butterknife.ButterKnife;
 
 import static com.stocktracker.BuildConfig.DEBUG;
 
-public class StockListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, StockLoader.StockLoaderCallback, ActionBarCallback.ActionBarListener {
+public class StockListFragment
+        extends Fragment
+        implements SwipeRefreshLayout.OnRefreshListener,
+        StockLoader.StockLoaderCallback,
+        ActionBarCallback.ActionBarListener {
 
     private static final String TAG = StockListFragment.class.getSimpleName();
     private static final int LOADER_ID = 0;
 
     @BindView(R.id.swipe)
-    public SwipeRefreshLayout mRefreshLayout;
+    public SwipeRefreshLayout refreshLayout;
 
     @BindView(R.id.recyclerview)
-    public RecyclerView mRecyclerView;
+    public RecyclerView recyclerView;
 
     @BindView(R.id.fab)
     public FloatingActionButton fab;
 
     // implementation of LoaderManager.LoaderCallbacks, used to load stocks from the database
-    private StockLoader mLoaderCallback = null;
+    private StockLoader loaderCallback = null;
 
-    private android.view.ActionMode mActionMode;
-    private final ActionBarCallback mActionModeCallback = new ActionBarCallback(this);
+    private android.view.ActionMode actionMode;
+    private final ActionBarCallback actionModeCallback = new ActionBarCallback(this);
 
     // implementation of Handler, used to load stock quote data from web service
     private Handler downloadHandler = null;
 
     // list of stocks loaded from the database
-    private List<Stock> mStockList;
+    private List<Stock> stockList;
 
-    private List<Quote> mQuoteList;
+    private List<Quote> quoteList;
 
-    private int mSelectedIndex;
+    private int selectedIndex;
 
     // callback to Activity
-    private StockListListener mCallback;
+    private StockListListener stockListListener;
 
     interface StockListListener {
         void addStock();
@@ -90,7 +94,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
 
         super.onCreate(savedInstanceState);
 
-        mQuoteList = new ArrayList<>();
+        quoteList = new ArrayList<>();
 
         new Handler().post(new Runnable() {
             @Override
@@ -100,7 +104,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
         });
 
         downloadHandler = new StockDownloadHandler(this);
-        mLoaderCallback = new StockLoader(getActivity(), this);
+        loaderCallback = new StockLoader(getActivity(), this);
     }
 
     @Nullable
@@ -110,55 +114,58 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
         CoordinatorLayout layout = (CoordinatorLayout) inflater.inflate(R.layout.stock_fragment_list, container, false);
         ButterKnife.bind(this, layout);
 
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
-        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), mQuoteList);
-        mRecyclerView.setAdapter(mStockAdapter);
+        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), quoteList);
+        recyclerView.setAdapter(mStockAdapter);
 
-        mRefreshLayout.setOnRefreshListener(this);
-        mRecyclerView.setLongClickable(true);
+        refreshLayout.setOnRefreshListener(this);
+        recyclerView.setLongClickable(true);
 
-        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                if (DEBUG) Log.d(TAG, "onItemClick, position = " + position);
-                view.setSelected(false);
-            }
-
-            @Override
-            public void onItemLongClick(View view, int position) {
-                if (DEBUG) Log.d(TAG, "onItemLongClick, position = " + position);
-                if (mActionMode != null) {
-                    return;
-                }
-                mSelectedIndex = position;
-
-                Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-                if(toolbar != null) {
-                    mActionMode = toolbar.startActionMode(mActionModeCallback);
-                }
-                mRecyclerView.getChildAt(mSelectedIndex).setSelected(true);
-            }
-        }));
+        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), recyclerView, itemClickListener));
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mCallback.addStock();
+                stockListListener.addStock();
             }
         });
 
         return layout;
     }
 
+    private final RecyclerItemClickListener.OnItemClickListener itemClickListener
+            = new RecyclerItemClickListener.OnItemClickListener() {
+        @Override
+        public void onItemClick(View view, int position) {
+            if (DEBUG) Log.d(TAG, "onItemClick, position = " + position);
+            view.setSelected(false);
+        }
+
+        @Override
+        public void onItemLongClick(View view, int position) {
+            if (DEBUG) Log.d(TAG, "onItemLongClick, position = " + position);
+            if (actionMode != null) {
+                return;
+            }
+            selectedIndex = position;
+
+            Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+            if(toolbar != null) {
+                actionMode = toolbar.startActionMode(actionModeCallback);
+            }
+            recyclerView.getChildAt(selectedIndex).setSelected(true);
+        }
+    };
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
 
         try {
-            mCallback = (StockListListener)context;
+            stockListListener = (StockListListener)context;
         }
         catch(ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement StockListListener");
@@ -176,28 +183,28 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
      * It shows the SwipeRefreshLayout progress
      */
     private void showSwipeProgress() {
-        mRefreshLayout.setRefreshing(true);
+        refreshLayout.setRefreshing(true);
     }
 
     /**
      * It shows the SwipeRefreshLayout progress
      */
     private void hideSwipeProgress() {
-        mRefreshLayout.setRefreshing(false);
+        refreshLayout.setRefreshing(false);
     }
 
     /**
      * Enables swipe gesture
      */
     private void enableSwipe() {
-        mRefreshLayout.setEnabled(true);
+        refreshLayout.setEnabled(true);
     }
 
     /**
      * Disables swipe gesture. It prevents manual gestures but keeps the option tu show refreshing programmatically.
      */
     private void disableSwipe() {
-        mRefreshLayout.setEnabled(false);
+        refreshLayout.setEnabled(false);
     }
 
     /**
@@ -215,13 +222,13 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
      */
     private void loadStockListFromDatabase() {
         if (DEBUG) Log.d(TAG, "loadStockListFromDatabase");
-        getLoaderManager().initLoader(LOADER_ID, null, mLoaderCallback);
+        getLoaderManager().initLoader(LOADER_ID, null, loaderCallback);
     }
 
     private void retrieveStockQuotesFromWebService() {
         if (DEBUG) Log.d(TAG, "retrieveStockQuotesFromWebService");
 
-        final String url = UrlBuilder.buildAllStocksQuoteUrl(this.mStockList);
+        final String url = UrlBuilder.buildAllStocksQuoteUrl(this.stockList);
 
         if (DEBUG) Log.d(TAG, "buildAllStocksQuoteUrl() returned " + url);
 
@@ -279,7 +286,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     public void onStocksLoadedFromDatabase(List<Stock> stocks) {
         if (DEBUG) Log.d(TAG, "onStocksLoadedFromDatabase");
 
-        this.mStockList = stocks;
+        this.stockList = stocks;
         retrieveStockQuotesFromWebService();
     }
 
@@ -294,7 +301,7 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
         } else {
             updateQuoteResponseObjects(quoteResponse);
             if (this.isVisible()) {
-                mQuoteList = quoteResponse.getQuotes();
+                quoteList = quoteResponse.getQuotes();
                 updateStockListDisplay(); //quoteResponse.getQuotes());
             }
         }
@@ -310,9 +317,9 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
      * @param quotes Quote object
      */
     private void updateQuoteResponseObjects(QuoteResponse quotes) {
-        if (quotes != null && !quotes.getLang().isEmpty() && mStockList != null && !mStockList.isEmpty()) {
+        if (quotes != null && !quotes.getLang().isEmpty() && stockList != null && !stockList.isEmpty()) {
             for (Quote q : quotes.getQuotes()) {
-                Stock s = getStockBySymbol(mStockList, q.getSymbol());
+                Stock s = getStockBySymbol(stockList, q.getSymbol());
                 if (s != null) {
                     if (DEBUG) Log.d(TAG, "Adding quantity to Quote for symbol " + q.getSymbol());
 
@@ -338,11 +345,11 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
      *
      */
     private void updateStockListDisplay() {
-        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), mQuoteList);
-        mRecyclerView.setAdapter(mStockAdapter);
+        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), quoteList);
+        recyclerView.setAdapter(mStockAdapter);
 
-        final BigDecimal marketValue = FormatUtils.getTotalMarketValue(mQuoteList);
-        final BigDecimal previousMarketValue = FormatUtils.getPreviousMarketValue(mQuoteList);
+        final BigDecimal marketValue = FormatUtils.getTotalMarketValue(quoteList);
+        final BigDecimal previousMarketValue = FormatUtils.getPreviousMarketValue(quoteList);
 
         if (DEBUG) Log.d(TAG, "Market Total BigDecimal = " + marketValue);
         if (DEBUG) Log.d(TAG, "Previous Market Total BigDecimal = " + previousMarketValue);
@@ -355,39 +362,39 @@ public class StockListFragment extends Fragment implements SwipeRefreshLayout.On
     // Action Bar callback
     @Override
     public void onDestroyActionMode(ActionMode mode) {
-        mRecyclerView.getChildAt(mSelectedIndex).setSelected(false);
-        mActionMode = null;
+        recyclerView.getChildAt(selectedIndex).setSelected(false);
+        actionMode = null;
     }
 
     // Action Bar callback
     @Override
     public void onActionItemClicked(MenuItem item) {
-        if(!isVisible() || mSelectedIndex < 0) {
+        if(!isVisible() || selectedIndex < 0) {
             return;
         }
 
-        final Quote quote = mQuoteList.get(mSelectedIndex);
+        final Quote quote = quoteList.get(selectedIndex);
         if (DEBUG) Log.d(TAG, "Selected quote = " + quote);
 
-        mRecyclerView.clearFocus(); // to remove the highlighted background
+        recyclerView.clearFocus(); // to remove the highlighted background
 
         switch(item.getItemId()) {
             case R.id.action_edit: {
                 if (DEBUG) Log.d(TAG, "Edit");
-                mActionMode.finish();
-                mCallback.editStock(quote);
+                actionMode.finish();
+                stockListListener.editStock(quote);
                 break;
             }
 //            case R.id.action_details: {
 //                if (DEBUG) Log.d(TAG, "Details");
-//                mActionMode.finish();
-//                mCallback.viewStockDetails(quote, quote.getId());
+//                actionMode.finish();
+//                stockListListener.viewStockDetails(quote, quote.getId());
 //                break;
 //            }
             case R.id.action_delete: {
                 if (DEBUG) Log.d(TAG, "Delete");
-                mActionMode.finish();
-                mCallback.deleteStock(quote.getSymbol(), quote.getId());
+                actionMode.finish();
+                stockListListener.deleteStock(quote.getSymbol(), quote.getId());
                 break;
             }
         }
