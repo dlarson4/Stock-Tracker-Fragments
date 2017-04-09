@@ -11,7 +11,6 @@ public class IOUtils {
     private static final int EOF = -1;
 
     private IOUtils() {
-
     }
 
     public static long copy(InputStream input, OutputStream output) throws IOException {

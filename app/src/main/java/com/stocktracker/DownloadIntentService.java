@@ -13,9 +13,10 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.stocktracker.data.QuoteResponse;
-import com.stocktracker.http.HttpRequestWrapper;
-import com.stocktracker.http.HttpTaskResponse;
-import com.stocktracker.parser.QuoteResponseStrategy;
+import com.stocktracker.http.HttpRequest;
+import com.stocktracker.http.HttpResponse;
+import com.stocktracker.parser.QuoteResponseParser;
+import com.stocktracker.util.StringUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,7 +31,6 @@ public class DownloadIntentService extends IntentService {
     public static final String MESSENGER = "MESSENGER";
     private static final String QUOTE_RESPONSE = "QUOTE_RESPONSE";
     private static final String CLASS_NAME = DownloadIntentService.class.getSimpleName();
-    private static final int MAX_DEBUG_CONTENT_LENGTH = 50000;
 
     public DownloadIntentService() {
         super(CLASS_NAME);
@@ -38,25 +38,18 @@ public class DownloadIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        if (DEBUG) Log.d(TAG, "onHandleIntent: ");
+
         final String url = intent.getData().toString();
-
-        if (DEBUG) Log.d(TAG, "Download URI = " + url);
-
         if (url == null) {
             return;
         }
 
-        HttpRequestWrapper httpRequest = new HttpRequestWrapper(url);
-        httpRequest.execute();
-        HttpTaskResponse response = httpRequest.getResponse();
-
-        logResponse(response);
-
-        if (response.isError()) {
-            if (DEBUG) Log.d(TAG, "Server did not respond.");
-            sendMessage(intent, null);
-        } else {
+        HttpResponse response = new HttpRequest(url).doGet();
+        if(response.isSuccess()) {
             parseResponse(response, intent);
+        } else {
+            sendMessage(intent, null);
         }
     }
 
@@ -88,19 +81,22 @@ public class DownloadIntentService extends IntentService {
         return message;
     }
 
-    private void parseResponse(HttpTaskResponse response, Intent intent) {
-        //Messenger messenger = (Messenger) intent.getExtras().get(MESSENGER);
+    private void parseResponse(HttpResponse response, Intent intent) {
+        if (DEBUG) Log.d(TAG, "parseResponse: ");
+
         QuoteResponse quoteResponse = null;
 
-        JSONObject json;
         try {
-            json = new JSONObject(response.getData());
-            log(json);
+            String responseData = response.getData();
+            if(StringUtil.isBlank(responseData)) {
+                if (DEBUG) Log.d(TAG, "parseResponse: response body is blank");
+            } else {
+                JSONObject json = new JSONObject(responseData);
+                if (DEBUG) Log.d(TAG, "parseResponse: json = " + json);
 
-            quoteResponse = new QuoteResponseStrategy().parse(json);
-
-            if (DEBUG) Log.d(TAG, "Parsed JSON = " + String.valueOf(quoteResponse));
-
+                quoteResponse = new QuoteResponseParser().parse(json);
+                if (DEBUG) Log.d(TAG, "parseResponse: quoteResponse = " + quoteResponse);
+            }
         } catch (JSONException e) {
             if (DEBUG) Log.d(TAG, "%s.%s: Failed to parse JSON from result.");
         }
@@ -142,25 +138,5 @@ public class DownloadIntentService extends IntentService {
         intent.putExtra(WHAT, what);
         return intent;
     }
-
-    private void logResponse(HttpTaskResponse response) {
-        if (DEBUG) Log.d(TAG, "HTTP response = " + response);
-
-    }
-
-    private void log(JSONObject json) {
-        if (DEBUG) {
-            if (json.length() < MAX_DEBUG_CONTENT_LENGTH) {
-                try {
-                    if (DEBUG) Log.d(TAG, "Parsed JSON: " + json.toString(4));
-                } catch (JSONException e) {
-                    if (DEBUG) Log.d(TAG, "Failed to parse JSON from result.");
-                }
-            } else {
-                if (DEBUG) Log.d(TAG, "Parsed JSON is too big to display (length = " + json.length() + ")");
-            }
-        }
-    }
-
 
 }
