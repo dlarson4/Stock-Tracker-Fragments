@@ -1,7 +1,5 @@
 .gradle
 /local.properties
-/.idea/workspace.xml
-/.idea/libraries
 .DS_Store
 /build
 /captures
@@ -9,3 +7,6 @@
 app/app.iml
 .idea
 Stock-Tracker-Fragments.iml
+gradlew
+StockTracker.iml
+gradle/
