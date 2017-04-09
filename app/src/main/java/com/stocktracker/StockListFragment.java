@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
@@ -55,6 +56,9 @@ public class StockListFragment
 
     @BindView(R.id.fab)
     public FloatingActionButton fab;
+
+    @BindView(R.id.totalMarketValue)
+    public TextView totalMarketValueView;
 
     // implementation of LoaderManager.LoaderCallbacks, used to load stocks from the database
     private StockLoader loaderCallback = null;
@@ -342,7 +346,6 @@ public class StockListFragment
 
     /**
      * Update the ListView with the provided list of Quote objects
-     *
      */
     private void updateStockListDisplay() {
         final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), quoteList);
@@ -354,8 +357,15 @@ public class StockListFragment
         if (DEBUG) Log.d(TAG, "Market Total BigDecimal = " + marketValue);
         if (DEBUG) Log.d(TAG, "Previous Market Total BigDecimal = " + previousMarketValue);
 
-        new MarketTotalUiUpdater(getActivity(), marketValue).update();
+        updateMarketValue(marketValue);
+
         new MarketChangeUiUpdater(getActivity(), marketValue, previousMarketValue).update();
+    }
+
+    private void updateMarketValue(BigDecimal marketValue) {
+        if (totalMarketValueView != null) {
+            totalMarketValueView.setText(FormatUtils.formatMarketValue(marketValue));
+        }
     }
 
 

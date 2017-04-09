@@ -6,7 +6,6 @@ import android.util.Log;
 import com.stocktracker.data.Quote;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Currency;
@@ -33,7 +32,7 @@ public class FormatUtils {
 
     public static String formatCurrency(BigDecimal bd) {
         try {
-            bd.setScale(3, RoundingMode.HALF_UP);
+//            bd.setScale(3, RoundingMode.HALF_UP);
             DecimalFormat formatter = (DecimalFormat) NumberFormat.getCurrencyInstance();
             formatter.setNegativePrefix("-");
             formatter.setNegativeSuffix("");
@@ -93,8 +92,7 @@ public class FormatUtils {
     public static ChangeType getChangeType(double d) {
         try {
             final int changeTypeInt = compareDouble(d);
-            final ChangeType c = ChangeType.getById(changeTypeInt);
-            return c;
+            return ChangeType.getById(changeTypeInt);
         } catch (NumberFormatException e) {
             Log.e(TAG, "Error parsing " + d, e);
         }

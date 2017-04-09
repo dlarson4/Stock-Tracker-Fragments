@@ -1,9 +1,8 @@
 package com.stocktracker;
 
 import android.app.Activity;
-import android.content.Context;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.widget.TextView;
 
 import com.stocktracker.util.FormatUtils;
@@ -18,29 +17,25 @@ import static com.stocktracker.BuildConfig.DEBUG;
 public class MarketChangeUiUpdater {
     private static final String TAG = MarketChangeUiUpdater.class.getSimpleName();
 
-    private Activity mActivity;
-    private BigDecimal mTodaysValue;
-    private BigDecimal mPreviousValue;
+    private Activity activity;
+    private BigDecimal todaysValue;
+    private BigDecimal previousValue;
 
     public MarketChangeUiUpdater(Activity activity, BigDecimal todaysValue, BigDecimal previousValue) {
-        mActivity = activity;
-        this.mTodaysValue = todaysValue;
-        this.mPreviousValue = previousValue;
+        this.activity = activity;
+        this.todaysValue = todaysValue;
+        this.previousValue = previousValue;
     }
 
     public void update() {
-        if (mTodaysValue != null && mPreviousValue != null) {
-            final BigDecimal todaysChange = mTodaysValue.subtract(mPreviousValue);
+        if (todaysValue != null && previousValue != null) {
+            final BigDecimal todaysChange = todaysValue.subtract(previousValue);
             final FormatUtils.ChangeType changeType = FormatUtils.getChangeType(todaysChange.doubleValue());
 
-            final TextView marketValueChangeView = (TextView) mActivity.findViewById(R.id.marketValueChange);
-            final TextView totalMarketChangePercentView = (TextView)mActivity.findViewById(R.id.totalMarketChangePercent);
+            final TextView marketValueChangeView = (TextView) activity.findViewById(R.id.marketValueChange);
+            final TextView totalMarketChangePercentView = (TextView) activity.findViewById(R.id.totalMarketChangePercent);
 
-            LayoutInflater layoutInflater = LayoutInflater.from(mActivity);
-            int changeColor = layoutInflater.getContext().getResources().getColor(R.color.green, mActivity.getTheme());
-            if (changeType == FormatUtils.ChangeType.Negative) {
-                changeColor = layoutInflater.getContext().getResources().getColor(R.color.red, mActivity.getTheme());
-            }
+            int changeColor = getChangeColor(changeType);
 
             // change amount
             final String todaysChangeFormatted = FormatUtils.formatMarketValue(todaysChange);
@@ -48,18 +43,28 @@ public class MarketChangeUiUpdater {
             marketValueChangeView.setTextColor(changeColor);
 
             // change as a percent
-            String changeSymbol = FormatUtils.getChangeSymbol(layoutInflater.getContext(), changeType);
+            String changeSymbol = FormatUtils.getChangeSymbol(activity, changeType);
 
-            if (DEBUG) Log.d(TAG, "mPreviousValue = " + mPreviousValue);
+            if (DEBUG) Log.d(TAG, "previousValue = " + previousValue);
 
-            if (mPreviousValue != null && mPreviousValue.intValue() != 0) {
-                BigDecimal todaysChangePercent = todaysChange.divide(mPreviousValue, 3);
+            if (previousValue != null && previousValue.intValue() != 0) {
+                BigDecimal todaysChangePercent = todaysChange.divide(previousValue, 3);
                 String todaysChangePercentFormatted = changeSymbol + FormatUtils.formatPercent(Math.abs(todaysChangePercent.doubleValue()));
 
                 totalMarketChangePercentView.setText(todaysChangePercentFormatted);
                 totalMarketChangePercentView.setTextColor(changeColor);
             }
         }
+    }
+
+    private int getChangeColor(FormatUtils.ChangeType changeType) {
+        int changeColor;
+        if (changeType == FormatUtils.ChangeType.Negative) {
+            changeColor = ActivityCompat.getColor(activity, R.color.red);
+        } else {
+            changeColor = ActivityCompat.getColor(activity, R.color.green);
+        }
+        return changeColor;
     }
 
 }

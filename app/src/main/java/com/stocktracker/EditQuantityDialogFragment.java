@@ -26,10 +26,10 @@ public class EditQuantityDialogFragment extends DialogFragment {
     public final static String TAG = EditQuantityDialogFragment.class.getSimpleName();
     private final static String QUOTE_ARG = "quote";
 
-    private EditStockListener mCallback;
+    private EditStockListener stockListenerCallback;
 
-    private EditText mQuantityEditText;
-    private Quote mQuote;
+    private EditText quantityEditText;
+    private Quote quote;
 
     public static EditQuantityDialogFragment newInstance(Quote quote) {
         EditQuantityDialogFragment fragment = new EditQuantityDialogFragment();
@@ -46,7 +46,7 @@ public class EditQuantityDialogFragment extends DialogFragment {
 
         if (DEBUG) Log.d(TAG, "onCreate");
         final Bundle args = getArguments();
-        mQuote = args.getParcelable(QUOTE_ARG);
+        quote = args.getParcelable(QUOTE_ARG);
     }
 
     @Override
@@ -56,14 +56,14 @@ public class EditQuantityDialogFragment extends DialogFragment {
         final View view = inflater.inflate(R.layout.edit_stock_quantity, null);
         TextView mTickerSymbolTextView = (TextView) view.findViewById(R.id.stockTicker);
         TextView mStockNameTextView = (TextView) view.findViewById(R.id.stockName);
-        mQuantityEditText = (EditText) view.findViewById(R.id.stockQuantity);
+        quantityEditText = (EditText) view.findViewById(R.id.stockQuantity);
 
-        mTickerSymbolTextView.setText(mQuote.getSymbol());
+        mTickerSymbolTextView.setText(quote.getSymbol());
 
-        if (mQuote != null) {
-            mStockNameTextView.setText(mQuote.getName());
-            mTickerSymbolTextView.setText(mQuote.getSymbol());
-            mQuantityEditText.setText(String.valueOf(mQuote.getQuantity()));
+        if (quote != null) {
+            mStockNameTextView.setText(quote.getName());
+            mTickerSymbolTextView.setText(quote.getSymbol());
+            quantityEditText.setText(String.valueOf(quote.getQuantity()));
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -99,14 +99,14 @@ public class EditQuantityDialogFragment extends DialogFragment {
     }
 
     private void editStock() {
-        final String quantityStr = mQuantityEditText.getText().toString();
+        final String quantityStr = quantityEditText.getText().toString();
 
-        if (DEBUG) Log.d(TAG, "New quantity for stock " + mQuote.getSymbol() + " = " + quantityStr);
+        if (DEBUG) Log.d(TAG, "New quantity for stock " + quote.getSymbol() + " = " + quantityStr);
 
         if (!Utils.isValidQuantity(quantityStr)) {
             Toast.makeText(this.getActivity(), "Invalid quantity (must be greater than 0)", Toast.LENGTH_SHORT).show();
         } else {
-            mCallback.updateStockQuantity(mQuote.getSymbol(), Double.parseDouble(quantityStr), mQuote.getId());
+            stockListenerCallback.updateStockQuantity(quote.getSymbol(), Double.parseDouble(quantityStr), quote.getId());
             dismiss();
         }
     }
@@ -115,7 +115,7 @@ public class EditQuantityDialogFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mCallback = (EditStockListener) activity;
+            stockListenerCallback = (EditStockListener) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement EditStockListener");
         }
