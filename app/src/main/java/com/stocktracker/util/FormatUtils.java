@@ -14,10 +14,10 @@ import java.util.Locale;
 
 import com.stocktracker.R;
 
+import static com.stocktracker.BuildConfig.DEBUG;
+
 public class FormatUtils {
     private static final String TAG = FormatUtils.class.getSimpleName();
-
-    private static final String STOCK_CHANGE_PERCENT_FORMAT = "%0$.2f%%";
 
     private FormatUtils() {
     }
@@ -45,7 +45,14 @@ public class FormatUtils {
     }
 
     public static String formatPercent(double d) {
-        return String.format(Locale.getDefault(), STOCK_CHANGE_PERCENT_FORMAT, d * 100);
+        if (DEBUG) Log.d(TAG, "formatPercent() d = [" + d + "]");
+
+        NumberFormat defaultFormat = NumberFormat.getPercentInstance();
+        defaultFormat.setMinimumFractionDigits(2);
+        String formatted = defaultFormat.format(d);
+
+        if (DEBUG) Log.d(TAG, "formatPercent() formatted: " + formatted);
+        return formatted;
     }
 
     public static double getPercentageChange(String valueStr, String changeStr) {
@@ -65,9 +72,6 @@ public class FormatUtils {
 
     /**
      * Basically determine if a value is a negative change, no change, or a positive change.
-     *
-     * @param value
-     * @return
      */
     public static ChangeType getChangeType(String value) {
         if (value == null) {
@@ -85,9 +89,6 @@ public class FormatUtils {
 
     /**
      * Basically determine if a value is a negative change, no change, or a positive change.
-     *
-     * @param d
-     * @return
      */
     public static ChangeType getChangeType(double d) {
         try {
@@ -160,9 +161,6 @@ public class FormatUtils {
 
     /**
      * Calculate the previous market value by adding the 'change' to the 'lastTradePriceOnly' and multiply by 'quantity' for each Quote
-     *
-     * @param quoteList
-     * @return
      */
     public static BigDecimal getPreviousMarketValue(List<Quote> quoteList) {
         if (quoteList == null) {
@@ -202,10 +200,6 @@ public class FormatUtils {
         return todaysChange;
     }
 
-    /**
-     * @param b
-     * @return
-     */
     public static String formatMarketValue(BigDecimal b) {
         DecimalFormat formatter = (DecimalFormat) NumberFormat.getCurrencyInstance();
         formatter.setCurrency(Currency.getInstance(Locale.US));

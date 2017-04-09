@@ -117,11 +117,6 @@ public class StockTrackerActivity extends AppCompatActivity
     }
 
     @Override
-    public void viewStockDetails(Quote quote, long id) {
-
-    }
-
-    @Override
     public void updateStockQuantity(String symbol, double quantity, long id) {
         if (DEBUG) Log.d(TAG, "updateStockQuantity, symbol = " + symbol + ", id = " + id + ", quantity " + quantity);
         dao.update(id, quantity); // TODO should be made asynchronous

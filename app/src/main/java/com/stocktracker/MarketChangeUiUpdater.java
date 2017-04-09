@@ -17,9 +17,9 @@ import static com.stocktracker.BuildConfig.DEBUG;
 public class MarketChangeUiUpdater {
     private static final String TAG = MarketChangeUiUpdater.class.getSimpleName();
 
-    private Activity activity;
-    private BigDecimal todaysValue;
-    private BigDecimal previousValue;
+    private final Activity activity;
+    private final BigDecimal todaysValue;
+    private final BigDecimal previousValue;
 
     public MarketChangeUiUpdater(Activity activity, BigDecimal todaysValue, BigDecimal previousValue) {
         this.activity = activity;
@@ -49,9 +49,9 @@ public class MarketChangeUiUpdater {
 
             if (previousValue != null && previousValue.intValue() != 0) {
                 BigDecimal todaysChangePercent = todaysChange.divide(previousValue, 3);
-                String todaysChangePercentFormatted = changeSymbol + FormatUtils.formatPercent(Math.abs(todaysChangePercent.doubleValue()));
+                String todaysChangePercentFormatted = FormatUtils.formatPercent(Math.abs(todaysChangePercent.doubleValue()));
 
-                totalMarketChangePercentView.setText(todaysChangePercentFormatted);
+                totalMarketChangePercentView.setText(changeSymbol + todaysChangePercentFormatted);
                 totalMarketChangePercentView.setTextColor(changeColor);
             }
         }

@@ -83,12 +83,10 @@ public class StockListFragment
         void addStock();
         void editStock(Quote quote);
         void deleteStock(String symbol, long id);
-        void viewStockDetails(Quote quote, long id);
     }
 
     public static StockListFragment newInstance() {
-        StockListFragment stockListFragment = new StockListFragment();
-        return stockListFragment;
+        return new StockListFragment();
     }
 
 
