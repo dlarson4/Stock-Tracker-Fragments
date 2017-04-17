@@ -28,6 +28,10 @@ public class MarketChangeUiUpdater {
     }
 
     public void update() {
+
+        if (DEBUG) Log.d(TAG, "update: todaysValue   = " + todaysValue);
+        if (DEBUG) Log.d(TAG, "update: previousValue = " + previousValue);
+
         if (todaysValue != null && previousValue != null) {
             final BigDecimal todaysChange = todaysValue.subtract(previousValue);
             final FormatUtils.ChangeType changeType = FormatUtils.getChangeType(todaysChange.doubleValue());

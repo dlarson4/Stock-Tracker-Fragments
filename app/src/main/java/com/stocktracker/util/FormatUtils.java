@@ -167,14 +167,20 @@ public class FormatUtils {
 
         BigDecimal yesterdaysTotalValue = null;
         for (Quote quote : quoteList) {
-            if (!Utils.isValidQuantity(quote.getChange())) {
-                Log.d(TAG, "No 'change' found in Quote, skipping");
+            if (!Utils.isValidChangeValue(quote.getChange())) {
+                Log.d(TAG, "getPreviousMarketValue: no change value for " + quote.getSymbol());
                 continue;
             }
             BigDecimal price = new BigDecimal(quote.getLastTradePriceOnly());
             BigDecimal quantity = new BigDecimal(quote.getQuantity());
             BigDecimal change = new BigDecimal(quote.getChange());
             BigDecimal yesterdaysValue = price.add(change.negate()).multiply(quantity);
+
+            if (DEBUG) Log.d(TAG, "getPreviousMarketValue: " + quote.getSymbol()
+                    + ": price=" + price
+                    + ", quantity=" + quantity
+                    + ", change=" + change
+                    + ", yesterdaysValue=" + yesterdaysValue );
 
             if (yesterdaysTotalValue == null) {
                 yesterdaysTotalValue = yesterdaysValue;

@@ -31,6 +31,9 @@ public class Utils {
         return true;
     }
 
+    /**
+     * Tests that the string parses to a {@link Double} and is greater than 0
+     */
     public static boolean isValidQuantity(String quantityStr) {
         if (quantityStr == null || quantityStr.trim().length() < 1) {
             return false;
@@ -39,11 +42,14 @@ public class Utils {
             double q = Double.parseDouble(quantityStr);
             return q > 0;
         } catch (NumberFormatException e) {
-            if(DEBUG) Log.d(TAG, "Error parsing quantity " + quantityStr + " to double.");
+            if(DEBUG) Log.d(TAG, "Error parsing quantity " + quantityStr + " to double.", e);
             return false;
         }
     }
 
+    /**
+     * Tests that the string parses to a {@link Double}
+     */
     public static boolean isValidChangeValue(String quantityStr) {
         if (quantityStr == null || quantityStr.trim().length() < 1) {
             return false;
@@ -52,7 +58,7 @@ public class Utils {
             double q = Float.parseFloat(quantityStr);
             return true;
         } catch (NumberFormatException e) {
-            if(DEBUG) Log.d(TAG, "Error parsing change " + quantityStr + " to float.");
+            if(DEBUG) Log.d(TAG, "Error parsing change " + quantityStr + " to float.", e);
             return false;
         }
     }
