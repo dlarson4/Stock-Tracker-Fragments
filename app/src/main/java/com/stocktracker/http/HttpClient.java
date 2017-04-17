@@ -36,8 +36,11 @@ public class HttpClient {
             builder.addQueryParameter(entry.getKey(), entry.getValue());
         }
 
+        HttpUrl httpUrl = builder.build();
+        if (DEBUG) Log.d(TAG, "get: httpUrl = " + httpUrl);
+
         Request request = new Request.Builder()
-                .url(builder.build())
+                .url(httpUrl)
                 .get()
                 .build();
 

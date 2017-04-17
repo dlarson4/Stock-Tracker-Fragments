@@ -93,7 +93,7 @@ public class StockListPresenter implements StockListContract.Presenter {
                 if (DEBUG) Log.d(TAG, "parseResponse: response body is blank");
             } else {
                 JSONObject json = new JSONObject(responseData);
-                if (DEBUG) Log.d(TAG, "parseResponse: json = " + json);
+                if (DEBUG) Log.d(TAG, "parseResponse: json = " + (json == null ? "null" : json.toString(4)));
 
                 quoteResponse = new QuoteResponseParser().parse(json);
                 if (DEBUG) Log.d(TAG, "parseResponse: quoteResponse = " + quoteResponse);
