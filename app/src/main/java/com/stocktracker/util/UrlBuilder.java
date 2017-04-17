@@ -2,110 +2,60 @@ package com.stocktracker.util;
 
 import android.util.Log;
 
-import com.stocktracker.data.Stock;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.stocktracker.BuildConfig.DEBUG;
 
-
-// TODO: combine buildAllStocksQuoteUrl and buildQuoteUrl, they're basically the same
 public class UrlBuilder {
     private final static String TAG = UrlBuilder.class.getSimpleName();
 
     // Console for debugging
     // https://developer.yahoo.com/yql/console/
 
-    private final static String YQL_BASE_URL = "http://query.yahooapis.com/v1/public/yql?format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
+    public final static String YQL_URL = "http://query.yahooapis.com/v1/public/yql";
     private final static String YQL_STOCK_INFO_QUERY = "select * from yahoo.finance.quote where symbol in (";
-    private final static String YQL_STOCK_EXISTS_QUERY = "select * from yahoo.finance.quote where symbol = \"%1$s\"";
 
-    public static String buildAllStocksQuoteUrl(List<Stock> stocks) {
-        if (stocks != null && !stocks.isEmpty()) {
-            StockInfoQueryBuilder builder = new StockInfoQueryBuilder();
-            for (Stock stock : stocks) {
-                builder.stock(stock.getSymbol());
-            }
-            return builder.build();
-        }
-        return null;
+    private static Map<String, String> baseParams = new HashMap<>();
+
+    static {
+
+        baseParams.put("format", "json");
+        baseParams.put("env", "store://datatables.org/alltableswithkeys");
     }
 
-    public static String buildQuoteUrl(String stock) {
-        StockExistsQueryBuilder builder = new StockExistsQueryBuilder(stock);
-        return builder.build();
+    public static Map<String, String> getStockQuoteParams(List<String> stockSymbols) {
+        if(stockSymbols == null || stockSymbols.isEmpty()) {
+            return Collections.EMPTY_MAP;
+        }
+
+        String query = buildQuery(YQL_STOCK_INFO_QUERY, stockSymbols);
+        if (DEBUG) Log.d(TAG, "getStockQuoteParams: query = " + query);
+
+        Map<String, String> params = new HashMap<>();
+        params.putAll(baseParams);
+        params.put("q", query);
+
+        return params;
     }
 
-    /**
-     * Build a Yahoo Finance API query for stock quote info
-     */
-    private static class StockInfoQueryBuilder {
-        private final static String CLASS_NAME = StockInfoQueryBuilder.class.getSimpleName();
-
-        private List<String> stockSymbols;
-
-        public StockInfoQueryBuilder() {
-            stockSymbols = new ArrayList<>();
-        }
-
-        public StockInfoQueryBuilder stock(String stock) {
-            stockSymbols.add(stock);
-            return this;
-        }
-
-        public String build() {
-            StringBuilder sb = new StringBuilder(200);
-            sb.append(YQL_BASE_URL).append("&q=");
-
-            StringBuilder query = new StringBuilder(YQL_STOCK_INFO_QUERY);
-            final int size = stockSymbols.size();
-            for (int i = 0; i < size; i++) {
-                query.append('"').append(stockSymbols.get(i)).append('"');
-                if (i < size - 1) {
-                    query.append(',');
-                }
-            }
-            query.append(')');
-
-            try {
-                sb.append(URLEncoder.encode(query.toString(), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                if (DEBUG) Log.d(TAG, "Error URL-encoding query " + query.toString());
-            }
-            return sb.toString();
-        }
+    public static Map<String, String> getStockQuoteParams(String stockSymbol) {
+        return getStockQuoteParams(Arrays.asList(stockSymbol));
     }
 
-    /**
-     * Build a Yahoo Finance API query to check if a stock symbol exists
-     */
-    private static class StockExistsQueryBuilder {
-        private final static String CLASS_NAME = UrlBuilder.class.getSimpleName();
-
-        private String stockSymbol;
-
-        public StockExistsQueryBuilder(String stockSymbol) {
-            this.stockSymbol = stockSymbol;
-        }
-
-        public String build() {
-            StringBuilder sb = new StringBuilder(150);
-            sb.append(YQL_BASE_URL).append("&q=");
-
-            String query = String.format(YQL_STOCK_EXISTS_QUERY, this.stockSymbol);
-
-            if (DEBUG) Log.d(TAG, "query = " + query);
-
-
-            try {
-                sb.append(URLEncoder.encode(query, "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                if (DEBUG) Log.d(TAG, "Error URL-encoding query " + query);
+    private static String buildQuery(String baseQuery, List<String> stockSymbols) {
+        StringBuilder query = new StringBuilder(baseQuery);
+        final int size = stockSymbols.size();
+        for (int i = 0; i < size; i++) {
+            query.append('"').append(stockSymbols.get(i)).append('"');
+            if (i < size - 1) {
+                query.append(',');
             }
-            return sb.toString();
         }
+        query.append(')');
+        return query.toString();
     }
 }

@@ -19,10 +19,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".DownloadIntentService"
-            android:exported="false"/>
-
         <provider
             android:name=".contentprovider.StockContentProvider"
             android:authorities="com.stocktracker.contentprovider"

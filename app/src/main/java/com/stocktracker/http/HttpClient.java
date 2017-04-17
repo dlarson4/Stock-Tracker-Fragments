@@ -9,8 +9,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -23,14 +26,22 @@ import static com.stocktracker.BuildConfig.DEBUG;
 public class HttpClient {
     private static final String TAG = "HttpClient";
 
-    public String get(String url) throws IOException {
-        if (DEBUG) Log.d(TAG, "get() url = [" + url + "]");
+    public String get(String url, Map<String, String> params) throws IOException {
+
+        OkHttpClient httpClient = getClient();
+        HttpUrl.Builder builder = HttpUrl.parse(url).newBuilder();
+
+        Set<Map.Entry<String, String>> entries = params.entrySet();
+        for (Map.Entry<String, String> entry : entries) {
+            builder.addQueryParameter(entry.getKey(), entry.getValue());
+        }
 
         Request request = new Request.Builder()
-                .url(url)
+                .url(builder.build())
+                .get()
                 .build();
 
-        try (Response response = getClient().newCall(request).execute()) {
+        try (Response response = httpClient.newCall(request).execute()) {
             if (DEBUG) Log.d(TAG, "get: response code = " + response.code());
             if(response.isSuccessful()) {
                 return getResponseBody(response.body().byteStream());

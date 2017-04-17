@@ -5,11 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,21 +15,17 @@ import android.widget.Toast;
 
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.db.StockContentProviderFacade;
-import com.stocktracker.util.UrlBuilder;
 import com.stocktracker.util.Utils;
-
-import java.lang.ref.WeakReference;
 
 import static com.stocktracker.BuildConfig.DEBUG;
 
 /**
  * Created by dlarson on 9/7/15.
  */
-public class AddStockDialogFragment extends DialogFragment {
+public class AddStockDialogFragment extends DialogFragment implements AddStockContract.View {
     public final static String TAG = AddStockDialogFragment.class.getSimpleName();
 
     private AddStockDialogListener mCallback;
-    private Handler downloadHandler = null;
 
     private StockContentProviderFacade mDao;
     private EditText mSymbolEditText;
@@ -45,7 +37,6 @@ public class AddStockDialogFragment extends DialogFragment {
 
         if (DEBUG) Log.d(TAG, "onCreate");
 
-        downloadHandler = new StockDownloadHandler(this);
         mDao = new StockContentProviderFacade(this.getActivity());
     }
 
@@ -107,61 +98,33 @@ public class AddStockDialogFragment extends DialogFragment {
             if (duplicate) {
                 Toast.makeText(this.getActivity(), getString(R.string.stock_alredy_exists, stockSymbol), Toast.LENGTH_SHORT).show();
             } else {
-                final String url = UrlBuilder.buildQuoteUrl(stockSymbol);
 
-                if (DEBUG) Log.d(TAG, "UrlBuilder.buildQuoteUrl() returned " + url);
-
-                Bundle extras = new Bundle();
-                extras.putString("TICKER", stockSymbol);
-                extras.putDouble("QUANTITY", Double.parseDouble(quantityStr));
-                Intent intent = DownloadIntentService.createIntent(this.getActivity(), Uri.parse(url), downloadHandler, extras, 0);
-
-                if (DEBUG) Log.d(TAG, "Starting download intent service.");
-
-                getActivity().startService(intent);
+                loadStockQuote(stockSymbol, Double.parseDouble(quantityStr));
             }
         }
     }
-    /**
-     * A constructor that gets a weak reference to the enclosing class. We do this to avoid memory leaks during Java
-     * Garbage Collection.
-     * <p/>
-     * groups.google.com/forum/#!msg/android-developers/1aPZXZG6kWk/lIYDavGYn5UJ
-     */
-    private static class StockDownloadHandler extends Handler {
-        // Allows Fragment to be garbage collected properly
-        private final WeakReference<AddStockDialogFragment> mFragment;
 
-        public StockDownloadHandler(AddStockDialogFragment activity) {
-            mFragment = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message message) {
-            AddStockDialogFragment fragment = mFragment.get();
-
-            // check if the AddStockFragment is gone
-            if (fragment == null) {
-                return;
-            }
-
-            QuoteResponse quoteResponse = DownloadIntentService.getQuoteResponse(message);
-            Bundle extras = DownloadIntentService.getExtras(message);
-
-            String ticker = extras.getString("TICKER");
-            double quantity = extras.getDouble("QUANTITY");
-
-            fragment.addStockDone(quoteResponse, ticker, quantity);
-        }
+    private void loadStockQuote(String stockSymbol, double quantity) {
+        new AddStockPresenter(this).getStockQuote(stockSymbol, quantity);
     }
 
-    private void addStockDone(QuoteResponse quoteResponse, String ticker, double quantity) {
+    @Override
+    public void quoteLoaded(QuoteResponse quoteResponse, double quantity) {
+        if (DEBUG) Log.d(TAG, "quoteLoaded()" +
+                " quoteResponse = [" + quoteResponse + "]," +
+                " quantity = [" + quantity + "]");
+
+        addStockDone(quoteResponse, quantity);
+    }
+
+    private void addStockDone(QuoteResponse quoteResponse, double quantity) {
         if (Utils.isValidStock(quoteResponse)) {
-            if (DEBUG) Log.d(TAG, "New stock " + ticker + " verified.");
             mCallback.saveNewStock(quoteResponse, quantity);
         } else {
-            if (DEBUG) Log.d(TAG, "User attempted to add invalid stock " + ticker);
-            Toast.makeText(getActivity(), getString(R.string.unrecognized_stock, ticker), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(),
+                    getString(R.string.unrecognized_stock, quoteResponse.getQuotes().get(0).getSymbol()),
+                    Toast.LENGTH_SHORT)
+                    .show();
         }
         AddStockDialogFragment.this.dismiss();
     }

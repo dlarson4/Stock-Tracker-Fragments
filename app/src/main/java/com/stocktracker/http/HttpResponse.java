@@ -36,6 +36,10 @@ public class HttpResponse {
         return data;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("HttpResponse{");

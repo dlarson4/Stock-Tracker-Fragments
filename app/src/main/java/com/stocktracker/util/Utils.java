@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
+
 import static com.stocktracker.BuildConfig.DEBUG;
 
 public class Utils {
@@ -16,7 +17,18 @@ public class Utils {
         }
 
         Quote q = response.getQuotes().get(0);
-        return q != null && q.getLastTradePriceOnly() != null && q.getStockExchange() != null;
+        if(q == null) {
+            return false;
+        }
+
+        if(StringUtil.isBlank(q.getLastTradePriceOnly()) || "null".equals(q.getLastTradePriceOnly())) {
+            return false;
+        }
+
+        if(StringUtil.isBlank(q.getStockExchange()) || "null".equals(q.getStockExchange())) {
+            return false;
+        }
+        return true;
     }
 
     public static boolean isValidQuantity(String quantityStr) {
@@ -32,8 +44,21 @@ public class Utils {
         }
     }
 
+    public static boolean isValidChangeValue(String quantityStr) {
+        if (quantityStr == null || quantityStr.trim().length() < 1) {
+            return false;
+        }
+        try {
+            double q = Float.parseFloat(quantityStr);
+            return true;
+        } catch (NumberFormatException e) {
+            if(DEBUG) Log.d(TAG, "Error parsing change " + quantityStr + " to float.");
+            return false;
+        }
+    }
+
     public static boolean hasMarshmallow() {
-        return android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }
 
 

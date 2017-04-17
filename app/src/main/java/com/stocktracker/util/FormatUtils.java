@@ -3,6 +3,7 @@ package com.stocktracker.util;
 import android.content.Context;
 import android.util.Log;
 
+import com.stocktracker.R;
 import com.stocktracker.data.Quote;
 
 import java.math.BigDecimal;
@@ -11,8 +12,6 @@ import java.text.NumberFormat;
 import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
-
-import com.stocktracker.R;
 
 import static com.stocktracker.BuildConfig.DEBUG;
 
@@ -23,7 +22,7 @@ public class FormatUtils {
     }
 
     public static String formatCurrency(String value) {
-        if (value == null) {
+        if (value == null || !Utils.isValidChangeValue(value)) {
             return "";
         }
 
@@ -65,7 +64,7 @@ public class FormatUtils {
             double value = Double.parseDouble(valueStr);
             return change / (value - change);
         } catch (NumberFormatException e) {
-            Log.e(TAG, "Error parsing " + valueStr, e);
+            Log.e(TAG, "Error parsing '" + valueStr + "'", e);
         }
         return 0.0;
     }
@@ -81,11 +80,10 @@ public class FormatUtils {
         try {
             return getChangeType(Double.parseDouble(value));
         } catch (NumberFormatException e) {
-            Log.e(TAG, "Error parsing " + value, e);
+            Log.e(TAG, "Error parsing '" + value + "'", e);
         }
         return ChangeType.NoChange;
     }
-
 
     /**
      * Basically determine if a value is a negative change, no change, or a positive change.
@@ -169,7 +167,7 @@ public class FormatUtils {
 
         BigDecimal yesterdaysTotalValue = null;
         for (Quote quote : quoteList) {
-            if (quote.getChange() == null) {
+            if (!Utils.isValidQuantity(quote.getChange())) {
                 Log.d(TAG, "No 'change' found in Quote, skipping");
                 continue;
             }

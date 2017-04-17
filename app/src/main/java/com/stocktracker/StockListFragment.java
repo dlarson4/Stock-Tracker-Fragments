@@ -2,11 +2,8 @@ package com.stocktracker;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -27,9 +24,7 @@ import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.data.Stock;
 import com.stocktracker.util.FormatUtils;
-import com.stocktracker.util.UrlBuilder;
 
-import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +38,8 @@ public class StockListFragment
         extends Fragment
         implements SwipeRefreshLayout.OnRefreshListener,
         StockLoader.StockLoaderCallback,
-        ActionBarCallback.ActionBarListener {
+        ActionBarCallback.ActionBarListener,
+        StockListContract.View {
 
     private static final String TAG = StockListFragment.class.getSimpleName();
     private static final int LOADER_ID = 0;
@@ -63,11 +59,8 @@ public class StockListFragment
     // implementation of LoaderManager.LoaderCallbacks, used to load stocks from the database
     private StockLoader loaderCallback = null;
 
-    private android.view.ActionMode actionMode;
+    private ActionMode actionMode;
     private final ActionBarCallback actionModeCallback = new ActionBarCallback(this);
-
-    // implementation of Handler, used to load stock quote data from web service
-    private Handler downloadHandler = null;
 
     // list of stocks loaded from the database
     private List<Stock> stockList;
@@ -105,7 +98,6 @@ public class StockListFragment
             }
         });
 
-        downloadHandler = new StockDownloadHandler(this);
         loaderCallback = new StockLoader(getActivity(), this);
     }
 
@@ -191,14 +183,16 @@ public class StockListFragment
     /**
      * It shows the SwipeRefreshLayout progress
      */
-    private void hideSwipeProgress() {
+    @Override
+    public void hideSwipeProgress() {
         refreshLayout.setRefreshing(false);
     }
 
     /**
      * Enables swipe gesture
      */
-    private void enableSwipe() {
+    @Override
+    public void enableSwipe() {
         refreshLayout.setEnabled(true);
     }
 
@@ -230,55 +224,21 @@ public class StockListFragment
     private void retrieveStockQuotesFromWebService() {
         if (DEBUG) Log.d(TAG, "retrieveStockQuotesFromWebService");
 
-        final String url = UrlBuilder.buildAllStocksQuoteUrl(this.stockList);
-
-        if (DEBUG) Log.d(TAG, "buildAllStocksQuoteUrl() returned " + url);
-
-        if(url == null) {
-            hideSwipeProgress();
-        } else {
-            // temporarily disable Refresh button
-            if (this.isVisible()) {
-                disableSwipe();
-            }
-            showSwipeProgress();
-            Intent intent = DownloadIntentService.createIntent(this.getActivity(), Uri.parse(url), downloadHandler, null, 0);
-
-            if (DEBUG) Log.d(TAG, "Starting download intent service.");
-
-            this.getActivity().startService(intent);
+        // temporarily disable Refresh button
+        if (this.isVisible()) {
+            disableSwipe();
         }
+        showSwipeProgress();
+
+        new StockListPresenter(this).getStockQuotes(stockList);
+        if (DEBUG) Log.d(TAG, "Starting download intent service.");
     }
 
-    /**
-     * A constructor that gets a weak reference to the enclosing class. We do this to avoid memory leaks during Java
-     * Garbage Collection.
-     * <p/>
-     * groups.google.com/forum/#!msg/android-developers/1aPZXZG6kWk/lIYDavGYn5UJ
-     */
-    private static class StockDownloadHandler extends Handler {
-        // Allows Fragment to be garbage collected properly
-        private final WeakReference<StockListFragment> mFragment;
+    @Override
+    public void displayQuoteResponse(QuoteResponse quoteResponse) {
+        if (DEBUG) Log.d(TAG, "displayQuoteResponse: ");
 
-        public StockDownloadHandler(StockListFragment activity) {
-            mFragment = new WeakReference<>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message message) {
-            StockListFragment fragment = mFragment.get();
-
-            // check if the StockListFragment is gone
-            if (fragment == null) {
-                return;
-            }
-
-            QuoteResponse quoteResponse = DownloadIntentService.getQuoteResponse(message);
-
-            mFragment.get().hideSwipeProgress();
-            mFragment.get().updateStockListDone(quoteResponse);
-            mFragment.get().enableSwipe();
-        }
+        updateStockListDone(quoteResponse);
     }
 
     /**
@@ -286,7 +246,7 @@ public class StockListFragment
      */
     @Override
     public void onStocksLoadedFromDatabase(List<Stock> stocks) {
-        if (DEBUG) Log.d(TAG, "onStocksLoadedFromDatabase");
+        if (DEBUG) Log.d(TAG, "onStocksLoadedFromDatabase() stocks = [" + stocks + "]");
 
         this.stockList = stocks;
         retrieveStockQuotesFromWebService();
@@ -310,7 +270,11 @@ public class StockListFragment
     }
 
     private void showErrorMessage() {
-        new AlertDialog.Builder(this.getActivity()).setMessage(R.string.load_error).setTitle(R.string.app_name).setPositiveButton(android.R.string.ok, null).show();
+        new AlertDialog.Builder(getContext())
+                .setMessage(R.string.load_error)
+                .setTitle(R.string.app_name)
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 
     /**
@@ -323,11 +287,13 @@ public class StockListFragment
             for (Quote q : quotes.getQuotes()) {
                 Stock s = getStockBySymbol(stockList, q.getSymbol());
                 if (s != null) {
-                    if (DEBUG) Log.d(TAG, "Adding quantity to Quote for symbol " + q.getSymbol());
+                    if (DEBUG) Log.d(TAG, "Adding quantity '" + s.getQuantity() + "' to quote " + q.getSymbol());
 
                     q.setQuantity(s.getQuantity());
-                    if (DEBUG) Log.d(TAG, "Adding SQLite id to Quote for symbol " + q.getSymbol());
+                    if (DEBUG) Log.d(TAG, "Adding SQLite id '" + s.getId() + "' to quote " + q.getSymbol());
                     q.setId(s.getId());
+
+                    if (DEBUG) Log.d(TAG, "updateQuoteResponseObjects: " + q);
                 }
             }
         }

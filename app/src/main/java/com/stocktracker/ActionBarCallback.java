@@ -5,7 +5,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-public class ActionBarCallback implements android.view.ActionMode.Callback {
+public class ActionBarCallback implements ActionMode.Callback {
     private ActionBarListener listener;
     
     interface ActionBarListener {

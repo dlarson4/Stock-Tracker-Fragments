@@ -2,6 +2,7 @@ package com.stocktracker;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,8 @@ import com.stocktracker.util.Utils;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
+
+import static com.stocktracker.BuildConfig.DEBUG;
 
 /**
  * Created by dlarson on 10/27/15.
@@ -58,15 +61,23 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
         String lastTradePriceFormatted = FormatUtils.formatCurrency(quote.getLastTradePriceOnly());
         holder.getStockPrice().setText(lastTradePriceFormatted);
 
-        String changeFormatted = FormatUtils.formatCurrency(quote.getChange());
-        holder.getStockChange().setText(changeFormatted);
+        boolean isChangeValid = Utils.isValidChangeValue(quote.getChange());
+        if(isChangeValid) {
+            String changeFormatted = FormatUtils.formatCurrency(quote.getChange());
+            holder.getStockChange().setText(changeFormatted);
 
-        double changePercent = FormatUtils.getPercentageChange(quote.getLastTradePriceOnly(), quote.getChange());
-        String changePercentFormatted = FormatUtils.formatPercent(changePercent);
-        holder.getStockChangePercentage().setText(changeSymbol + changePercentFormatted);
+            double changePercent = FormatUtils.getPercentageChange(quote.getLastTradePriceOnly(), quote.getChange());
+            String changePercentFormatted = FormatUtils.formatPercent(changePercent);
+            holder.getStockChangePercentage().setText(changeSymbol + changePercentFormatted);
 
-        holder.getStockChange().setTextColor(changeColor);
-        holder.getStockChangePercentage().setTextColor(changeColor);
+            holder.getStockChange().setTextColor(changeColor);
+            holder.getStockChangePercentage().setTextColor(changeColor);
+
+        } else {
+            if (DEBUG) Log.e(TAG, "onBindViewHolder: invalid change value '" + quote.getChange() + "'");
+            holder.getStockChange().setText("-");
+            holder.getStockChange().setTextColor(changeColor);
+        }
     }
 
     @Override
@@ -75,21 +86,25 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
     }
 
     private int getChangeColor(Quote quote) {
-        int changeColor;
+
         final FormatUtils.ChangeType changeType = FormatUtils.getChangeType(quote.getChange());
 
+        int colorId;
         if (changeType == FormatUtils.ChangeType.Negative) {
-            if(Utils.hasMarshmallow()) {
-                changeColor = layoutInflater.getContext().getResources().getColor(R.color.red, context.get().getTheme());
-            } else {
-                changeColor = layoutInflater.getContext().getResources().getColor(R.color.red);
-            }
+            colorId = R.color.red;
+        } else if(changeType == FormatUtils.ChangeType.Positive) {
+            colorId = R.color.green;
+        } else if(changeType == FormatUtils.ChangeType.NoChange) {
+            colorId = R.color.black;
         } else {
-            if(Utils.hasMarshmallow()) {
-                changeColor = layoutInflater.getContext().getResources().getColor(R.color.green, context.get().getTheme());
-            } else {
-                changeColor = layoutInflater.getContext().getResources().getColor(R.color.green);
-            }
+            colorId = R.color.holo_gray_light;
+        }
+
+        int changeColor;
+        if(Utils.hasMarshmallow()) {
+            changeColor = layoutInflater.getContext().getResources().getColor(colorId, context.get().getTheme());
+        } else {
+            changeColor = layoutInflater.getContext().getResources().getColor(colorId);
         }
         return changeColor;
     }
