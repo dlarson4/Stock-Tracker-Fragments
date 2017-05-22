@@ -38,11 +38,6 @@ public class Quote implements Parcelable
         this.symbol = symbol;
     }
 
-    public String getAverageDailyVolume()
-    {
-        return averageDailyVolume;
-    }
-
     public void setAverageDailyVolume(String averageDailyVolume)
     {
         this.averageDailyVolume = averageDailyVolume;
@@ -58,19 +53,9 @@ public class Quote implements Parcelable
         this.change = change;
     }
 
-    public String getDaysLow()
-    {
-        return daysLow;
-    }
-
     public void setDaysLow(String daysLow)
     {
         this.daysLow = daysLow;
-    }
-
-    public String getDaysHigh()
-    {
-        return daysHigh;
     }
 
     public void setDaysHigh(String daysHigh)
@@ -78,29 +63,14 @@ public class Quote implements Parcelable
         this.daysHigh = daysHigh;
     }
 
-    public String getYearLow()
-    {
-        return yearLow;
-    }
-
     public void setYearLow(String yearLow)
     {
         this.yearLow = yearLow;
     }
 
-    public String getYearHigh()
-    {
-        return yearHigh;
-    }
-
     public void setYearHigh(String yearHigh)
     {
         this.yearHigh = yearHigh;
-    }
-
-    public String getMarketCapitalization()
-    {
-        return marketCapitalization;
     }
 
     public void setMarketCapitalization(String marketCapitalization)
@@ -118,11 +88,6 @@ public class Quote implements Parcelable
         this.lastTradePriceOnly = lastTradePriceOnly;
     }
 
-    public String getDaysRange()
-    {
-        return daysRange;
-    }
-
     public void setDaysRange(String daysRange)
     {
         this.daysRange = daysRange;
@@ -136,11 +101,6 @@ public class Quote implements Parcelable
     public void setName(String name)
     {
         this.name = name;
-    }
-
-    public String getVolume()
-    {
-        return volume;
     }
 
     public void setVolume(String volume)
