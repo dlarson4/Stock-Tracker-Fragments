@@ -3,8 +3,7 @@ package com.stocktracker.data;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Quote implements Parcelable
-{
+public class Quote implements Parcelable {
     private String symbol;
     private String averageDailyVolume;
     private String change;
@@ -25,72 +24,36 @@ public class Quote implements Parcelable
     // SQLite id
     private long id;
     
-    private Quote() {
+    private Quote(Quote.Builder builder) {
+        symbol = builder.symbol;
+        averageDailyVolume = builder.averageDailyVolume;
+        change = builder.change;
+        daysLow = builder.daysLow;
+        daysHigh = builder.daysHigh;
+        yearLow = builder.yearLow;
+        yearHigh = builder.yearHigh;
+        marketCapitalization = builder.marketCapitalization;
+        lastTradePriceOnly = builder.lastTradePriceOnly;
+        daysRange = builder.daysRange;
+        name = builder.name;
+        volume = builder.volume;
+        stockExchange = builder.stockExchange;
     }
     
-    public String getSymbol()
-    {
+    public String getSymbol() {
         return symbol;
     }
 
-    public void setSymbol(String symbol)
-    {
+    public void setSymbol(String symbol) {
         this.symbol = symbol;
     }
 
-    public void setAverageDailyVolume(String averageDailyVolume)
-    {
-        this.averageDailyVolume = averageDailyVolume;
-    }
-
-    public String getChange()
-    {
+    public String getChange() {
         return change;
     }
 
-    public void setChange(String change)
-    {
-        this.change = change;
-    }
-
-    public void setDaysLow(String daysLow)
-    {
-        this.daysLow = daysLow;
-    }
-
-    public void setDaysHigh(String daysHigh)
-    {
-        this.daysHigh = daysHigh;
-    }
-
-    public void setYearLow(String yearLow)
-    {
-        this.yearLow = yearLow;
-    }
-
-    public void setYearHigh(String yearHigh)
-    {
-        this.yearHigh = yearHigh;
-    }
-
-    public void setMarketCapitalization(String marketCapitalization)
-    {
-        this.marketCapitalization = marketCapitalization;
-    }
-
-    public String getLastTradePriceOnly()
-    {
+    public String getLastTradePriceOnly() {
         return lastTradePriceOnly;
-    }
-
-    public void setLastTradePriceOnly(String lastTradePriceOnly)
-    {
-        this.lastTradePriceOnly = lastTradePriceOnly;
-    }
-
-    public void setDaysRange(String daysRange)
-    {
-        this.daysRange = daysRange;
     }
 
     public String getName()
@@ -103,19 +66,9 @@ public class Quote implements Parcelable
         this.name = name;
     }
 
-    public void setVolume(String volume)
-    {
-        this.volume = volume;
-    }
-
     public String getStockExchange()
     {
         return stockExchange;
-    }
-
-    public void setStockExchange(String stockExchange)
-    {
-        this.stockExchange = stockExchange;
     }
 
     public double getQuantity()
@@ -123,8 +76,7 @@ public class Quote implements Parcelable
         return quantity;
     }
 
-    public void setQuantity(double quantity)
-    {
+    public void setQuantity(double quantity) {
         this.quantity = quantity;
     }
 
@@ -133,8 +85,7 @@ public class Quote implements Parcelable
         return id;
     }
 
-    public void setId(long id)
-    {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -217,8 +168,7 @@ public class Quote implements Parcelable
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags)
-    {
+    public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(symbol);
         dest.writeString(averageDailyVolume);
         dest.writeString(change);
@@ -236,21 +186,17 @@ public class Quote implements Parcelable
         dest.writeLong(id);
     }
 
-    public static final Creator<Quote> CREATOR = new Creator<Quote>()
-    {
-        public Quote createFromParcel(Parcel in)
-        {
+    public static final Creator<Quote> CREATOR = new Creator<Quote>() {
+        public Quote createFromParcel(Parcel in) {
             return new Quote(in);
         }
 
-        public Quote[] newArray(int size)
-        {
+        public Quote[] newArray(int size) {
             return new Quote[size];
         }
     };
 
-    private Quote(Parcel in)
-    {
+    private Quote(Parcel in) {
         this.symbol = in.readString();
         this.averageDailyVolume = in.readString();
         this.change = in.readString();
@@ -267,7 +213,6 @@ public class Quote implements Parcelable
         this.quantity = in.readDouble();
         this.id = in.readLong();
     }
-
 
     public static class Builder {
         private String symbol;
@@ -366,23 +311,7 @@ public class Quote implements Parcelable
 
 
         public Quote build() {
-            Quote quote = new Quote();
-            quote.setChange(change);
-            quote.setAverageDailyVolume(averageDailyVolume);
-            quote.setDaysLow(daysLow);
-            quote.setDaysHigh(daysHigh);
-            quote.setYearLow(yearLow);
-            quote.setYearHigh(yearHigh);
-            quote.setLastTradePriceOnly(lastTradePriceOnly);
-            quote.setDaysRange(daysRange);
-            quote.setStockExchange(stockExchange);
-            quote.setQuantity(quantity);
-            quote.setId(id);
-            quote.setSymbol(symbol);
-            quote.setName(name);
-            quote.setMarketCapitalization(marketCapitalization);
-            quote.setVolume(volume);
-            return quote;
+            return new Quote(this);
         }
     }
 }
