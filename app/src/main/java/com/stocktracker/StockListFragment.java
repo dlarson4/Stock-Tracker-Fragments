@@ -72,6 +72,8 @@ public class StockListFragment
     // callback to Activity
     private StockListListener stockListListener;
 
+    private StockListContract.Presenter presenter;
+
     interface StockListListener {
         void addStock();
         void editStock(Quote quote);
@@ -196,6 +198,11 @@ public class StockListFragment
         refreshLayout.setEnabled(true);
     }
 
+    @Override
+    public void setPresenter(StockListContract.Presenter stockListPresenter) {
+        this.presenter = stockListPresenter;
+    }
+
     /**
      * Disables swipe gesture. It prevents manual gestures but keeps the option tu show refreshing programmatically.
      */
@@ -230,7 +237,7 @@ public class StockListFragment
         }
         showSwipeProgress();
 
-        new StockListPresenter(this).getStockQuotes(stockList);
+        presenter.getStockQuotes(stockList);
         if (DEBUG) Log.d(TAG, "Starting download intent service.");
     }
 

@@ -18,7 +18,9 @@ import com.stocktracker.db.StockContentProviderFacade;
 import static com.stocktracker.BuildConfig.DEBUG;
 
 public class StockTrackerActivity extends AppCompatActivity
-        implements AddStockDialogFragment.AddStockDialogListener, StockListFragment.StockListListener, EditQuantityDialogFragment.EditStockListener {
+        implements AddStockDialogFragment.AddStockDialogListener,
+        StockListFragment.StockListListener,
+        EditQuantityDialogFragment.EditStockListener {
     private final static String TAG = StockTrackerActivity.class.getSimpleName();
 
     private DialogFragment addStockDialog;
@@ -40,11 +42,22 @@ public class StockTrackerActivity extends AppCompatActivity
             supportActionBar.setDisplayHomeAsUpEnabled(false);
         }
 
-        if (savedInstanceState == null) {
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragmentContainer, StockListFragment.newInstance());
-            transaction.commit();
+        StockListFragment fragment = (StockListFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.fragmentContainer);
+
+        if(fragment == null) {
+            fragment = StockListFragment.newInstance();
         }
+
+        new StockListPresenter(fragment);
+
+        showFragment(fragment);
+    }
+
+    private void showFragment(Fragment fragment) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragmentContainer, fragment);
+        transaction.commit();
     }
 
     @Override

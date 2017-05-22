@@ -36,6 +36,7 @@ public class StockListPresenter implements StockListContract.Presenter {
 
     public StockListPresenter(StockListContract.View view) {
         this.view = view;
+        view.setPresenter(this);
     }
 
     @Nullable

@@ -14,7 +14,7 @@ public class StockListContract {
         void displayQuoteResponse(QuoteResponse quoteResponse);
         void hideSwipeProgress();
         void enableSwipe();
-
+        void setPresenter(StockListContract.Presenter stockListPresenter);
     }
 
     public interface Presenter {
