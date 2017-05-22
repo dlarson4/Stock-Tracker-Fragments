@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.stocktracker.data.Quote;
+import com.stocktracker.data.Stock;
 import com.stocktracker.util.Utils;
 
 import static com.stocktracker.BuildConfig.DEBUG;
@@ -24,18 +25,18 @@ import static com.stocktracker.BuildConfig.DEBUG;
  */
 public class EditQuantityDialogFragment extends DialogFragment {
     public final static String TAG = EditQuantityDialogFragment.class.getSimpleName();
-    private final static String QUOTE_ARG = "quote";
+    private final static String STOCK_ARG = "stock";
 
     private EditStockListener stockListenerCallback;
 
     private EditText quantityEditText;
-    private Quote quote;
+    private Stock stock;
 
-    public static EditQuantityDialogFragment newInstance(Quote quote) {
+    public static EditQuantityDialogFragment newInstance(Stock stock) {
         EditQuantityDialogFragment fragment = new EditQuantityDialogFragment();
 
         Bundle bundle = new Bundle();
-        bundle.putParcelable(EditQuantityDialogFragment.QUOTE_ARG, quote);
+        bundle.putParcelable(EditQuantityDialogFragment.STOCK_ARG, stock);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -46,7 +47,7 @@ public class EditQuantityDialogFragment extends DialogFragment {
 
         if (DEBUG) Log.d(TAG, "onCreate");
         final Bundle args = getArguments();
-        quote = args.getParcelable(QUOTE_ARG);
+        stock = args.getParcelable(STOCK_ARG);
     }
 
     @Override
@@ -54,16 +55,16 @@ public class EditQuantityDialogFragment extends DialogFragment {
         final LayoutInflater inflater = getActivity().getLayoutInflater();
 
         final View view = inflater.inflate(R.layout.edit_stock_quantity, null);
-        TextView mTickerSymbolTextView = (TextView) view.findViewById(R.id.stockTicker);
-        TextView mStockNameTextView = (TextView) view.findViewById(R.id.stockName);
+        TextView tickerSymbolTextView = (TextView) view.findViewById(R.id.stockTicker);
+        TextView stockNameTextView = (TextView) view.findViewById(R.id.stockName);
         quantityEditText = (EditText) view.findViewById(R.id.stockQuantity);
 
-        mTickerSymbolTextView.setText(quote.getSymbol());
+        tickerSymbolTextView.setText(stock.getSymbol());
 
-        if (quote != null) {
-            mStockNameTextView.setText(quote.getName());
-            mTickerSymbolTextView.setText(quote.getSymbol());
-            quantityEditText.setText(String.valueOf(quote.getQuantity()));
+        if (stock != null) {
+//            stockNameTextView.setText(quote.getName()); // TODO get name from ... db?
+            tickerSymbolTextView.setText(stock.getSymbol());
+            quantityEditText.setText(String.valueOf(stock.getQuantity()));
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -101,12 +102,12 @@ public class EditQuantityDialogFragment extends DialogFragment {
     private void editStock() {
         final String quantityStr = quantityEditText.getText().toString();
 
-        if (DEBUG) Log.d(TAG, "New quantity for stock " + quote.getSymbol() + " = " + quantityStr);
+        if (DEBUG) Log.d(TAG, "New quantity for stock " + stock.getSymbol() + " = " + quantityStr);
 
         if (!Utils.isValidQuantity(quantityStr)) {
             Toast.makeText(this.getActivity(), "Invalid quantity (must be greater than 0)", Toast.LENGTH_SHORT).show();
         } else {
-            stockListenerCallback.updateStockQuantity(quote.getSymbol(), Double.parseDouble(quantityStr), quote.getId());
+            stockListenerCallback.updateStockQuantity(stock.getSymbol(), Double.parseDouble(quantityStr), stock.getId());
             dismiss();
         }
     }

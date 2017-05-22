@@ -49,7 +49,7 @@ public class StockTrackerActivity extends AppCompatActivity
             fragment = StockListFragment.newInstance();
         }
 
-        new StockListPresenter(fragment);
+        new StockListPresenter(getApplicationContext(), fragment);
 
         showFragment(fragment);
     }
@@ -117,8 +117,8 @@ public class StockTrackerActivity extends AppCompatActivity
     }
 
     @Override
-    public void editStock(Quote quote) {
-        EditQuantityDialogFragment editQuantityDialogFragment = EditQuantityDialogFragment.newInstance(quote);
+    public void editStock(Stock stock) {
+        EditQuantityDialogFragment editQuantityDialogFragment = EditQuantityDialogFragment.newInstance(stock);
         editQuantityDialogFragment.show(getFragmentManager(), EditQuantityDialogFragment.TAG);
     }
 

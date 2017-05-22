@@ -1,6 +1,8 @@
 package com.stocktracker;
 
-import com.stocktracker.data.QuoteResponse;
+import android.support.v4.app.LoaderManager;
+
+import com.stocktracker.data.Quote;
 import com.stocktracker.data.Stock;
 
 import java.util.List;
@@ -11,14 +13,20 @@ import java.util.List;
 
 public class StockListContract {
     public interface View {
-        void displayQuoteResponse(QuoteResponse quoteResponse);
         void hideSwipeProgress();
         void enableSwipe();
         void setPresenter(StockListContract.Presenter stockListPresenter);
+        void showSwipeProgress();
+        void disableSwipe();
+        LoaderManager getLoaderManager();
+        void showErrorMessage();
+        void updateStockListDisplay(List<Quote> quoteList);
     }
 
     public interface Presenter {
-        void getStockQuotes(final List<Stock> stocks);
+        void start();
+        void onSwipeRefresh();
+        Stock getStock(int selectedIndex);
     }
 
 }

@@ -3,7 +3,6 @@ package com.stocktracker;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -21,7 +20,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.stocktracker.data.Quote;
-import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.data.Stock;
 import com.stocktracker.util.FormatUtils;
 
@@ -37,12 +35,10 @@ import static com.stocktracker.BuildConfig.DEBUG;
 public class StockListFragment
         extends Fragment
         implements SwipeRefreshLayout.OnRefreshListener,
-        StockLoader.StockLoaderCallback,
         ActionBarCallback.ActionBarListener,
         StockListContract.View {
 
     private static final String TAG = StockListFragment.class.getSimpleName();
-    private static final int LOADER_ID = 0;
 
     @BindView(R.id.swipe)
     public SwipeRefreshLayout refreshLayout;
@@ -56,16 +52,8 @@ public class StockListFragment
     @BindView(R.id.totalMarketValue)
     public TextView totalMarketValueView;
 
-    // implementation of LoaderManager.LoaderCallbacks, used to load stocks from the database
-    private StockLoader loaderCallback = null;
-
     private ActionMode actionMode;
     private final ActionBarCallback actionModeCallback = new ActionBarCallback(this);
-
-    // list of stocks loaded from the database
-    private List<Stock> stockList;
-
-    private List<Quote> quoteList;
 
     private int selectedIndex;
 
@@ -76,31 +64,12 @@ public class StockListFragment
 
     interface StockListListener {
         void addStock();
-        void editStock(Quote quote);
+        void editStock(Stock stock);
         void deleteStock(String symbol, long id);
     }
 
     public static StockListFragment newInstance() {
         return new StockListFragment();
-    }
-
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        if (DEBUG) Log.d(TAG, "onCreate");
-
-        super.onCreate(savedInstanceState);
-
-        quoteList = new ArrayList<>();
-
-        new Handler().post(new Runnable() {
-            @Override
-            public void run() {
-                updateStockList();
-            }
-        });
-
-        loaderCallback = new StockLoader(getActivity(), this);
     }
 
     @Nullable
@@ -114,7 +83,7 @@ public class StockListFragment
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
 
-        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), quoteList);
+        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), new ArrayList<>());
         recyclerView.setAdapter(mStockAdapter);
 
         refreshLayout.setOnRefreshListener(this);
@@ -122,14 +91,16 @@ public class StockListFragment
 
         recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), recyclerView, itemClickListener));
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                stockListListener.addStock();
-            }
-        });
+        fab.setOnClickListener(view -> stockListListener.addStock());
 
         return layout;
+    }
+
+    @Override
+    public void onResume() {
+        if (DEBUG) Log.d(TAG, "onResume: ");
+        super.onResume();
+        presenter.start();
     }
 
     private final RecyclerItemClickListener.OnItemClickListener itemClickListener
@@ -171,14 +142,14 @@ public class StockListFragment
     @Override
     public void onRefresh() {
         if (DEBUG) Log.d(TAG, "onRefresh");
-        disableSwipe();
-        updateStockList();
+        presenter.onSwipeRefresh();
     }
 
     /**
      * It shows the SwipeRefreshLayout progress
      */
-    private void showSwipeProgress() {
+    @Override
+    public void showSwipeProgress() {
         refreshLayout.setRefreshing(true);
     }
 
@@ -206,7 +177,8 @@ public class StockListFragment
     /**
      * Disables swipe gesture. It prevents manual gestures but keeps the option tu show refreshing programmatically.
      */
-    private void disableSwipe() {
+    @Override
+    public void disableSwipe() {
         refreshLayout.setEnabled(false);
     }
 
@@ -216,67 +188,11 @@ public class StockListFragment
      */
     void updateStockList() {
         if (DEBUG) Log.d(TAG, "updateStockList");
-        loadStockListFromDatabase();
-    }
-
-    /**
-     * Start a loader to retrieve the stock list from the database.  (This eventually initiates the process of
-     * retrieving quote information from the web service and performing a full refresh)
-     */
-    private void loadStockListFromDatabase() {
-        if (DEBUG) Log.d(TAG, "loadStockListFromDatabase");
-        getLoaderManager().initLoader(LOADER_ID, null, loaderCallback);
-    }
-
-    private void retrieveStockQuotesFromWebService() {
-        if (DEBUG) Log.d(TAG, "retrieveStockQuotesFromWebService");
-
-        // temporarily disable Refresh button
-        if (this.isVisible()) {
-            disableSwipe();
-        }
-        showSwipeProgress();
-
-        presenter.getStockQuotes(stockList);
-        if (DEBUG) Log.d(TAG, "Starting download intent service.");
+        presenter.onSwipeRefresh(); // TODO temporary hack until more refactoring is done
     }
 
     @Override
-    public void displayQuoteResponse(QuoteResponse quoteResponse) {
-        if (DEBUG) Log.d(TAG, "displayQuoteResponse: ");
-
-        updateStockListDone(quoteResponse);
-    }
-
-    /**
-     * Callback from StockLoader, called when the list of stocks has been retrieved from the database
-     */
-    @Override
-    public void onStocksLoadedFromDatabase(List<Stock> stocks) {
-        if (DEBUG) Log.d(TAG, "onStocksLoadedFromDatabase() stocks = [" + stocks + "]");
-
-        this.stockList = stocks;
-        retrieveStockQuotesFromWebService();
-    }
-
-    /**
-     * Called by the handler after refreshed stock list data is retrieved
-     *
-     * @param quoteResponse Quote response object
-     */
-    private void updateStockListDone(QuoteResponse quoteResponse) {
-        if (quoteResponse == null) {
-            showErrorMessage();
-        } else {
-            updateQuoteResponseObjects(quoteResponse);
-            if (this.isVisible()) {
-                quoteList = quoteResponse.getQuotes();
-                updateStockListDisplay(); //quoteResponse.getQuotes());
-            }
-        }
-    }
-
-    private void showErrorMessage() {
+    public void showErrorMessage() {
         new AlertDialog.Builder(getContext())
                 .setMessage(R.string.load_error)
                 .setTitle(R.string.app_name)
@@ -285,42 +201,12 @@ public class StockListFragment
     }
 
     /**
-     * Update each Quote object in the quoteList with the quantity from the database
-     *
-     * @param quotes Quote object
-     */
-    private void updateQuoteResponseObjects(QuoteResponse quotes) {
-        if (quotes != null && !quotes.getLang().isEmpty() && stockList != null && !stockList.isEmpty()) {
-            for (Quote q : quotes.getQuotes()) {
-                Stock s = getStockBySymbol(stockList, q.getSymbol());
-                if (s != null) {
-                    if (DEBUG) Log.d(TAG, "Adding quantity '" + s.getQuantity() + "' to quote " + q.getSymbol());
-
-                    q.setQuantity(s.getQuantity());
-                    if (DEBUG) Log.d(TAG, "Adding SQLite id '" + s.getId() + "' to quote " + q.getSymbol());
-                    q.setId(s.getId());
-
-                    if (DEBUG) Log.d(TAG, "updateQuoteResponseObjects: " + q);
-                }
-            }
-        }
-    }
-
-    private Stock getStockBySymbol(List<Stock> stocks, String symbol) {
-        for (Stock s : stocks) {
-            if (s.getSymbol() != null && s.getSymbol().equalsIgnoreCase(symbol)) {
-                return s;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Update the ListView with the provided list of Quote objects
      */
-    private void updateStockListDisplay() {
-        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), quoteList);
-        recyclerView.setAdapter(mStockAdapter);
+    @Override
+    public void updateStockListDisplay(final List<Quote> quoteList) {
+        final RecyclerView.Adapter stockAdapter = new StockAdapter(getContext(), quoteList);
+        recyclerView.setAdapter(stockAdapter);
 
         final BigDecimal marketValue = FormatUtils.getTotalMarketValue(quoteList);
         final BigDecimal previousMarketValue = FormatUtils.getPreviousMarketValue(quoteList);
@@ -339,7 +225,6 @@ public class StockListFragment
         }
     }
 
-
     // Action Bar callback
     @Override
     public void onDestroyActionMode(ActionMode mode) {
@@ -354,8 +239,8 @@ public class StockListFragment
             return;
         }
 
-        final Quote quote = quoteList.get(selectedIndex);
-        if (DEBUG) Log.d(TAG, "Selected quote = " + quote);
+        Stock stock = presenter.getStock(selectedIndex);
+        if (DEBUG) Log.d(TAG, "Selected stock = " + stock);
 
         recyclerView.clearFocus(); // to remove the highlighted background
 
@@ -363,19 +248,13 @@ public class StockListFragment
             case R.id.action_edit: {
                 if (DEBUG) Log.d(TAG, "Edit");
                 actionMode.finish();
-                stockListListener.editStock(quote);
+                stockListListener.editStock(stock);
                 break;
             }
-//            case R.id.action_details: {
-//                if (DEBUG) Log.d(TAG, "Details");
-//                actionMode.finish();
-//                stockListListener.viewStockDetails(quote, quote.getId());
-//                break;
-//            }
             case R.id.action_delete: {
                 if (DEBUG) Log.d(TAG, "Delete");
                 actionMode.finish();
-                stockListListener.deleteStock(quote.getSymbol(), quote.getId());
+                stockListListener.deleteStock(stock.getSymbol(), stock.getId());
                 break;
             }
         }

@@ -3,23 +3,24 @@
               xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:orientation="vertical">
+              android:orientation="vertical"
+              xmlns:tools="http://schemas.android.com/tools">
 
 
     <TextView
         android:id="@+id/stockTicker"
         style="@style/EditQuantityStockTicker"
-        android:text="swppx"/>
+        tools:text="swppx"/>
 
     <TextView
         android:id="@+id/stockName"
         style="@style/EditQuantityTextView"
-        android:text="iShares Core S&amp;P"/>
+        tools:text="iShares Core S&amp;P"/>
 
     <EditText
         android:id="@+id/stockQuantity"
         style="@style/EditQuantityTextView"
         android:hint="@string/quantity"
-        android:text="150.001"/>
+        tools:text="150.001"/>
 
 </LinearLayout>
