@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -62,6 +63,8 @@ public class StockListFragment
 
     private StockListContract.Presenter presenter;
 
+    private CoordinatorLayout mainView;
+
     interface StockListListener {
         void addStock();
         void editStock(Stock stock);
@@ -76,24 +79,24 @@ public class StockListFragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        CoordinatorLayout layout = (CoordinatorLayout) inflater.inflate(R.layout.stock_fragment_list, container, false);
-        ButterKnife.bind(this, layout);
+        mainView = (CoordinatorLayout) inflater.inflate(R.layout.stock_fragment_list, container, false);
+        ButterKnife.bind(this, mainView);
 
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL_LIST));
 
-        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getActivity(), new ArrayList<>());
+        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getContext(), new ArrayList<>());
         recyclerView.setAdapter(mStockAdapter);
 
         refreshLayout.setOnRefreshListener(this);
         recyclerView.setLongClickable(true);
 
-        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(), recyclerView, itemClickListener));
+        recyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getContext(), recyclerView, itemClickListener));
 
         fab.setOnClickListener(view -> stockListListener.addStock());
 
-        return layout;
+        return mainView;
     }
 
     @Override
@@ -119,7 +122,8 @@ public class StockListFragment
             }
             selectedIndex = position;
 
-            Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+
+            Toolbar toolbar = ButterKnife.findById(mainView, R.id.toolbar);
             if(toolbar != null) {
                 actionMode = toolbar.startActionMode(actionModeCallback);
             }
@@ -216,8 +220,50 @@ public class StockListFragment
 
         updateMarketValue(marketValue);
 
-        new MarketChangeUiUpdater(getActivity(), marketValue, previousMarketValue).update();
+        updateMarketValue(marketValue, previousMarketValue);
+//        new MarketChangeUiUpdater(getActivity(), marketValue, previousMarketValue).update();
     }
+
+    private void updateMarketValue(final BigDecimal todaysValue, final BigDecimal previousValue) {
+        if (todaysValue != null && previousValue != null) {
+            final BigDecimal todaysChange = todaysValue.subtract(previousValue);
+            final FormatUtils.ChangeType changeType = FormatUtils.getChangeType(todaysChange.doubleValue());
+
+            final TextView marketValueChangeView = ButterKnife.findById(mainView, R.id.marketValueChange);
+            final TextView totalMarketChangePercentView = ButterKnife.findById(mainView, R.id.totalMarketChangePercent);
+
+            int changeColor = getChangeColor(changeType);
+
+            // change amount
+            final String todaysChangeFormatted = FormatUtils.formatMarketValue(todaysChange);
+            marketValueChangeView.setText(todaysChangeFormatted);
+            marketValueChangeView.setTextColor(changeColor);
+
+            // change as a percent
+            String changeSymbol = FormatUtils.getChangeSymbol(getContext(), changeType);
+
+            if (DEBUG) Log.d(TAG, "previousValue = " + previousValue);
+
+            if (previousValue != null && previousValue.intValue() != 0) {
+                BigDecimal todaysChangePercent = todaysChange.divide(previousValue, 3);
+                String todaysChangePercentFormatted = FormatUtils.formatPercent(Math.abs(todaysChangePercent.doubleValue()));
+
+                totalMarketChangePercentView.setText(changeSymbol + todaysChangePercentFormatted);
+                totalMarketChangePercentView.setTextColor(changeColor);
+            }
+        }
+    }
+
+    private int getChangeColor(FormatUtils.ChangeType changeType) {
+        int changeColor;
+        if (changeType == FormatUtils.ChangeType.Negative) {
+            changeColor = ActivityCompat.getColor(getContext(), R.color.red);
+        } else {
+            changeColor = ActivityCompat.getColor(getContext(), R.color.green);
+        }
+        return changeColor;
+    }
+
 
     private void updateMarketValue(BigDecimal marketValue) {
         if (totalMarketValueView != null) {

@@ -10,7 +10,6 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.data.Stock;
 import com.stocktracker.db.StockContentProviderFacade;
