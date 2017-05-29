@@ -209,6 +209,11 @@ public class StockListFragment
      */
     @Override
     public void updateStockListDisplay(final List<Quote> quoteList) {
+        if(quoteList == null) {
+            Log.e(TAG, "updateStockListDisplay: quoteList is null");
+            return;
+        }
+
         final RecyclerView.Adapter stockAdapter = new StockAdapter(getContext(), quoteList);
         recyclerView.setAdapter(stockAdapter);
 
@@ -221,7 +226,6 @@ public class StockListFragment
         updateMarketValue(marketValue);
 
         updateMarketValue(marketValue, previousMarketValue);
-//        new MarketChangeUiUpdater(getActivity(), marketValue, previousMarketValue).update();
     }
 
     private void updateMarketValue(final BigDecimal todaysValue, final BigDecimal previousValue) {
