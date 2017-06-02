@@ -1,12 +1,14 @@
 package com.stocktracker;
 
-import android.content.Context;
+import android.app.Application;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.data.Stock;
+import com.stocktracker.db.AppDatabase;
+import com.stocktracker.db.DatabaseCreator;
 import com.stocktracker.http.HttpRequest;
 import com.stocktracker.http.HttpResponse;
 import com.stocktracker.parser.QuoteResponseParser;
@@ -21,9 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.stocktracker.BuildConfig.DEBUG;
@@ -34,21 +34,15 @@ import static com.stocktracker.BuildConfig.DEBUG;
 public class StockListPresenter implements StockListContract.Presenter {
     private static final String TAG = "StockListPresenter";
 
-    private static final int LOADER_ID = 0;
-
-    private final Context context;
+    private final Application application;
     private final StockListContract.View view;
 
     // list of stocks loaded from the database
     private List<Stock> stockList;
 
-    // implementation of LoaderManager.LoaderCallbacks, used to load stocks from the database
-    private StockLoader stockLoader = null;
-
-    public StockListPresenter(Context context, StockListContract.View view) {
-        this.context = context;
+    public StockListPresenter(Application application, StockListContract.View view) {
+        this.application = application;
         this.view = view;
-        stockLoader = new StockLoader(this.context, stockLoaderCallback);
         view.setPresenter(this);
     }
 
@@ -69,12 +63,9 @@ public class StockListPresenter implements StockListContract.Presenter {
         return stockList == null ? null : stockList.get(selectedIndex);
     }
 
-    private final StockLoader.StockLoaderCallback stockLoaderCallback = stocks -> {
-        if (DEBUG) Log.d(TAG, "onStocksLoadedFromDatabase() stocks = [" + stocks + "]");
-
-        this.stockList = stocks;
-        retrieveStockQuotesFromWebService();
-    };
+    private AppDatabase getDatabase() {
+        return DatabaseCreator.getInstance(application).getDatabase();
+    }
 
     /**
      * Called by the controlling Activity when the stocks should be updated, like when
@@ -85,13 +76,22 @@ public class StockListPresenter implements StockListContract.Presenter {
         loadStockListFromDatabase();
     }
 
-    /**
-     * Start a loader to retrieve the stock list from the database.  (This eventually initiates the process of
-     * retrieving quote information from the web service and performing a full refresh)
-     */
     private void loadStockListFromDatabase() {
         if (DEBUG) Log.d(TAG, "loadStockListFromDatabase");
-        view.getLoaderManager().initLoader(LOADER_ID, null, stockLoader);
+
+        getStocksObservable()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(stocks -> {
+                    Log.d(TAG, "loadStockListFromDatabase: stocks = " + stocks);
+                    this.stockList = stocks;
+                    if(!this.stockList.isEmpty()) {
+                        retrieveStockQuotesFromWebService();
+                    }
+                }, throwable -> {
+                    if (DEBUG) Log.e(TAG, "", throwable);
+                    view.showErrorMessage();
+                });
     }
 
     private void retrieveStockQuotesFromWebService() {
@@ -114,14 +114,15 @@ public class StockListPresenter implements StockListContract.Presenter {
         getStockQuoteObservable(stockSymbols)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .flatMap(new Function<HttpResponse, ObservableSource<QuoteResponse>>() {
-                    @Override
-                    public ObservableSource<QuoteResponse> apply(HttpResponse response) throws Exception {
-                        if(response == HttpResponse.INVALID_URL || response == HttpResponse.SERVER_UNAVAILABLE) {
-                            return Observable.error(new RuntimeException(response.getStatus().name()));
-                        }
-                        return Observable.just(parseResponse(response));
+                .flatMap(response -> {
+                    if(response == HttpResponse.INVALID_URL || response == HttpResponse.SERVER_UNAVAILABLE) {
+                        return Observable.error(new RuntimeException(response.getStatus().name()));
                     }
+                    QuoteResponse quoteResponse = parseResponse(response);
+                    if(quoteResponse == null) {
+                        return Observable.just(new QuoteResponse.Builder().build());
+                    }
+                    return Observable.just(quoteResponse);
                 })
                 .subscribe(quoteResponse -> {
                     if (DEBUG) Log.d(TAG, "accept() quoteResponse = [" + quoteResponse + "]");
@@ -194,6 +195,10 @@ public class StockListPresenter implements StockListContract.Presenter {
         });
     }
 
+    private Observable<List<Stock>> getStocksObservable() {
+        return Observable.fromCallable(() -> getDatabase().stockDao().getAll());
+    }
+
     private QuoteResponse parseResponse(HttpResponse response) {
         if (DEBUG) Log.d(TAG, "parseResponse() response = [" + response + "]");
 
@@ -203,6 +208,7 @@ public class StockListPresenter implements StockListContract.Presenter {
             String responseData = response.getData();
             if(StringUtil.isBlank(responseData)) {
                 if (DEBUG) Log.d(TAG, "parseResponse: response body is blank");
+                quoteResponse = new QuoteResponse.Builder().build();
             } else {
                 JSONObject json = new JSONObject(responseData);
                 if (DEBUG) Log.d(TAG, "parseResponse: json = " + (json == null ? "null" : json.toString(4)));
@@ -213,9 +219,6 @@ public class StockListPresenter implements StockListContract.Presenter {
         } catch (JSONException e) {
             if (DEBUG) Log.d(TAG, "", e);
         }
-
         return quoteResponse;
     }
-
-
 }

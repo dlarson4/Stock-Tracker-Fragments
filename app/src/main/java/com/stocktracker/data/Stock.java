@@ -1,41 +1,67 @@
 package com.stocktracker.data;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Stock implements Parcelable
-{
-    private long id;
-    private String symbol;
-    private double quantity;
-    private long dateCreatedMillis;
+@Entity(tableName = "stock")
+public class Stock implements Parcelable {
 
-    public Stock(long id, String symbol, double quantity, long dateCreatedMillis) {
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
+    private long id;
+
+    @ColumnInfo(name = "stock")
+    private String symbol;
+
+    @ColumnInfo(name = "quantity")
+    private double quantity;
+
+    // just for deleting
+    @Ignore
+    public Stock(long id) {
+        this.id = id;
+    }
+
+    public Stock(String symbol, double quantity) {
+        super();
+        this.symbol = symbol;
+        this.quantity = quantity;
+    }
+
+    @Ignore
+    public Stock(long id, String symbol, double quantity) {
         super();
         this.id = id;
         this.symbol = symbol;
         this.quantity = quantity;
-        this.dateCreatedMillis = dateCreatedMillis;
     }
 
-    public long getId()
-    {
+    public long getId() {
         return id;
     }
 
-    public String getSymbol()
-    {
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getSymbol() {
         return symbol;
     }
 
-    public double getQuantity()
-    {
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public double getQuantity() {
         return quantity;
     }
 
-    public long getDateCreatedMillis()
-    {
-        return dateCreatedMillis;
+    public void setQuantity(double quantity) {
+        this.quantity = quantity;
     }
 
     @Override
@@ -47,7 +73,6 @@ public class Stock implements Parcelable
 
         if (id != stock.id) return false;
         if (Double.compare(stock.quantity, quantity) != 0) return false;
-        if (dateCreatedMillis != stock.dateCreatedMillis) return false;
         return symbol != null ? symbol.equals(stock.symbol) : stock.symbol == null;
 
     }
@@ -60,7 +85,6 @@ public class Stock implements Parcelable
         result = 31 * result + (symbol != null ? symbol.hashCode() : 0);
         temp = Double.doubleToLongBits(quantity);
         result = 31 * result + (int) (temp ^ (temp >>> 32));
-        result = 31 * result + (int) (dateCreatedMillis ^ (dateCreatedMillis >>> 32));
         return result;
     }
 
@@ -70,7 +94,6 @@ public class Stock implements Parcelable
         sb.append("id=").append(id);
         sb.append(", symbol='").append(symbol).append('\'');
         sb.append(", quantity=").append(quantity);
-        sb.append(", dateCreatedMillis=").append(dateCreatedMillis);
         sb.append('}');
         return sb.toString();
     }
@@ -82,16 +105,13 @@ public class Stock implements Parcelable
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags)
-    {
+    public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(id);
         dest.writeString(symbol);
         dest.writeDouble(quantity);
-        dest.writeLong(dateCreatedMillis);
     }
 
-    public static final Creator<Stock> CREATOR = new Creator<Stock>()
-    {
+    public static final Creator<Stock> CREATOR = new Creator<Stock>() {
         public Stock createFromParcel(Parcel in)
         {
             return new Stock(in);
@@ -103,12 +123,10 @@ public class Stock implements Parcelable
         }
     };
 
-    private Stock(Parcel in)
-    {
+    private Stock(Parcel in) {
         this.id = in.readLong();
         this.symbol = in.readString();
         this.quantity = in.readDouble();
-        this.dateCreatedMillis = in.readLong();
     }
     
 }

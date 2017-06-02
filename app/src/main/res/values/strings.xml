@@ -24,6 +24,13 @@
     <string name="stock_alredy_exists">Stock %1$s already exists</string>
     <string name="unrecognized_stock">Unrecognized stock symdol %1$s</string>
     <string name="saved">Saved</string>
+    <string name="save_error">An error occurred saving the stock to the database.</string>
+
+    <string name="deleted">Stock deleted</string>
+    <string name="delete_error">An error occurred deleting the stock from the database.</string>
+
+    <string name="updated">Stock updated</string>
+    <string name="update_error">An error occurred updating the stock.</string>
 
     <string name="load_error">Server Unavailable</string>
     <string name="quantity">Quantity</string>

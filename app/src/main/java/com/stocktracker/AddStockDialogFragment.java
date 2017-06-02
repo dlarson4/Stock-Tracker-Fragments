@@ -1,9 +1,9 @@
 package com.stocktracker;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,8 +14,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.stocktracker.data.QuoteResponse;
-import com.stocktracker.db.StockContentProviderFacade;
+import com.stocktracker.data.Stock;
+import com.stocktracker.db.AppDatabase;
+import com.stocktracker.db.DatabaseCreator;
 import com.stocktracker.util.Utils;
+
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.stocktracker.BuildConfig.DEBUG;
 
@@ -25,9 +31,8 @@ import static com.stocktracker.BuildConfig.DEBUG;
 public class AddStockDialogFragment extends DialogFragment implements AddStockContract.View {
     public final static String TAG = AddStockDialogFragment.class.getSimpleName();
 
-    private AddStockDialogListener mCallback;
+    private AddStockDialogListener callback;
 
-    private StockContentProviderFacade mDao;
     private EditText mSymbolEditText;
     private EditText mQuantityEditText;
 
@@ -36,8 +41,6 @@ public class AddStockDialogFragment extends DialogFragment implements AddStockCo
         super.onCreate(savedInstanceState);
 
         if (DEBUG) Log.d(TAG, "onCreate");
-
-        mDao = new StockContentProviderFacade(this.getActivity());
     }
 
     @Override
@@ -91,17 +94,44 @@ public class AddStockDialogFragment extends DialogFragment implements AddStockCo
         } else if (!Utils.isValidQuantity(quantityStr)) {
             Toast.makeText(this.getActivity(), "Invalid quantity (must be greater than 0)", Toast.LENGTH_SHORT).show();
         } else {
-            final boolean duplicate = mDao.isDuplicate(stockSymbol); // TODO should be made asynchronous
-
-            if (DEBUG) Log.d(TAG, "Stock " + stockSymbol + " is duplicate? " + duplicate);
-
-            if (duplicate) {
-                Toast.makeText(this.getActivity(), getString(R.string.stock_alredy_exists, stockSymbol), Toast.LENGTH_SHORT).show();
-            } else {
-
-                loadStockQuote(stockSymbol, Double.parseDouble(quantityStr));
-            }
+            checkIfStockExists(stockSymbol, quantityStr);
         }
+    }
+
+    private void checkIfStockExists(String symbol, String quantityStr) {
+        getStockExistsObservable(symbol)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(exists -> {
+                    if (exists) {
+                        stockAlreadyExists(symbol);
+                    } else {
+                        stockDoesNotAlreadyExist(symbol, quantityStr);
+                    }
+                }, throwable -> {
+                    Log.e(TAG, "", throwable);
+                });
+    }
+
+    private void stockAlreadyExists(String symbol) {
+        Log.d(TAG, "stockAlreadyExists: ");
+        Toast.makeText(getActivity(), getString(R.string.stock_alredy_exists, symbol), Toast.LENGTH_SHORT).show();
+    }
+
+    private void stockDoesNotAlreadyExist(String symbol, String quantityStr) {
+        Log.d(TAG, "stockDoesNotAlreadyExist: ");
+        loadStockQuote(symbol, Double.parseDouble(quantityStr));
+    }
+
+    private Observable<Boolean> getStockExistsObservable(String symbol) {
+        return Observable.fromCallable(() -> {
+            Stock stock = getDatabase().stockDao().findByTicker(symbol);
+            return stock != null;
+        });
+    }
+
+    private AppDatabase getDatabase() {
+        return DatabaseCreator.getInstance(getActivity().getApplication()).getDatabase();
     }
 
     private void loadStockQuote(String stockSymbol, double quantity) {
@@ -119,7 +149,7 @@ public class AddStockDialogFragment extends DialogFragment implements AddStockCo
 
     private void addStockDone(QuoteResponse quoteResponse, double quantity) {
         if (Utils.isValidStock(quoteResponse)) {
-            mCallback.saveNewStock(quoteResponse, quantity);
+            callback.saveNewStock(quoteResponse, quantity);
         } else {
             Toast.makeText(getActivity(),
                     getString(R.string.unrecognized_stock, quoteResponse.getQuotes().get(0).getSymbol()),
@@ -134,12 +164,12 @@ public class AddStockDialogFragment extends DialogFragment implements AddStockCo
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    public void onAttach(Context context) {
+        super.onAttach(context);
         try {
-            mCallback = (AddStockDialogListener) activity;
+            callback = (AddStockDialogListener) context;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement AddStockDialogListener");
+            throw new ClassCastException(context.toString() + " must implement AddStockDialogListener");
         }
     }
 

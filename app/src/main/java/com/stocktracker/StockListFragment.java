@@ -122,8 +122,7 @@ public class StockListFragment
             }
             selectedIndex = position;
 
-
-            Toolbar toolbar = ButterKnife.findById(mainView, R.id.toolbar);
+            Toolbar toolbar = ButterKnife.findById(getActivity(), R.id.toolbar);
             if(toolbar != null) {
                 actionMode = toolbar.startActionMode(actionModeCallback);
             }

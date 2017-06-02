@@ -1,28 +1,65 @@
 package com.stocktracker.data;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+@Entity(tableName = "quote")
 public class Quote implements Parcelable {
+
+    @PrimaryKey
+    @ColumnInfo(name = "symbol")
     private String symbol;
-    private String averageDailyVolume;
-    private String change;
-    private String daysLow;
-    private String daysHigh;
-    private String yearLow;
-    private String yearHigh;
-    private String marketCapitalization;
-    private String lastTradePriceOnly;
-    private String daysRange;
+
+    @ColumnInfo(name = "name")
     private String name;
+
+    @ColumnInfo(name = "average_daily_volume")
+    private String averageDailyVolume;
+
+    @ColumnInfo(name = "change")
+    private String change;
+
+    @ColumnInfo(name = "days_low")
+    private String daysLow;
+
+    @ColumnInfo(name = "days_high")
+    private String daysHigh;
+
+    @ColumnInfo(name = "year_low")
+    private String yearLow;
+
+    @ColumnInfo(name = "year_high")
+    private String yearHigh;
+
+    @ColumnInfo(name = "market_capitalization")
+    private String marketCapitalization;
+
+    @ColumnInfo(name = "last_trade_price_only")
+    private String lastTradePriceOnly;
+
+    @ColumnInfo(name = "days_range")
+    private String daysRange;
+
+    @ColumnInfo(name = "volume")
     private String volume;
+
+    @ColumnInfo(name = "stock_exchange")
     private String stockExchange;
 
     // populated from the database, not the web service
+    @Ignore
     private double quantity;
 
     // SQLite id
+    @Ignore
     private long id;
+
+    public Quote() {
+    }
     
     private Quote(Quote.Builder builder) {
         symbol = builder.symbol;
@@ -76,17 +113,92 @@ public class Quote implements Parcelable {
         return quantity;
     }
 
-    public void setQuantity(double quantity) {
-        this.quantity = quantity;
+    public String getAverageDailyVolume() {
+        return averageDailyVolume;
     }
 
-    public long getId()
-    {
+    public String getDaysLow() {
+        return daysLow;
+    }
+
+    public String getDaysHigh() {
+        return daysHigh;
+    }
+
+    public String getYearLow() {
+        return yearLow;
+    }
+
+    public String getYearHigh() {
+        return yearHigh;
+    }
+
+    public String getMarketCapitalization() {
+        return marketCapitalization;
+    }
+
+    public String getDaysRange() {
+        return daysRange;
+    }
+
+    public String getVolume() {
+        return volume;
+    }
+
+    public long getId() {
         return id;
+    }
+
+    public void setAverageDailyVolume(String averageDailyVolume) {
+        this.averageDailyVolume = averageDailyVolume;
+    }
+
+    public void setChange(String change) {
+        this.change = change;
+    }
+
+    public void setDaysLow(String daysLow) {
+        this.daysLow = daysLow;
+    }
+
+    public void setDaysHigh(String daysHigh) {
+        this.daysHigh = daysHigh;
+    }
+
+    public void setYearLow(String yearLow) {
+        this.yearLow = yearLow;
+    }
+
+    public void setYearHigh(String yearHigh) {
+        this.yearHigh = yearHigh;
+    }
+
+    public void setMarketCapitalization(String marketCapitalization) {
+        this.marketCapitalization = marketCapitalization;
+    }
+
+    public void setLastTradePriceOnly(String lastTradePriceOnly) {
+        this.lastTradePriceOnly = lastTradePriceOnly;
+    }
+
+    public void setDaysRange(String daysRange) {
+        this.daysRange = daysRange;
+    }
+
+    public void setVolume(String volume) {
+        this.volume = volume;
+    }
+
+    public void setStockExchange(String stockExchange) {
+        this.stockExchange = stockExchange;
     }
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public void setQuantity(double quantity) {
+        this.quantity = quantity;
     }
 
     @Override

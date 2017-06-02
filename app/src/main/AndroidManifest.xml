@@ -19,12 +19,6 @@
             </intent-filter>
         </activity>
 
-        <provider
-            android:name=".contentprovider.StockContentProvider"
-            android:authorities="com.stocktracker.contentprovider"
-            android:exported="false">
-        </provider>
-
     </application>
 
 </manifest>
