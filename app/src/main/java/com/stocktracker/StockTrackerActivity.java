@@ -1,6 +1,8 @@
 package com.stocktracker;
 
 import android.app.DialogFragment;
+import android.arch.lifecycle.LifecycleRegistry;
+import android.arch.lifecycle.LifecycleRegistryOwner;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -24,7 +26,8 @@ import static com.stocktracker.BuildConfig.DEBUG;
 public class StockTrackerActivity extends AppCompatActivity
         implements AddStockDialogFragment.AddStockDialogListener,
         StockListFragment.StockListListener,
-        EditQuantityDialogFragment.EditStockListener {
+        EditQuantityDialogFragment.EditStockListener,
+        LifecycleRegistryOwner {
     private final static String TAG = StockTrackerActivity.class.getSimpleName();
 
     private DialogFragment addStockDialog;
@@ -49,7 +52,7 @@ public class StockTrackerActivity extends AppCompatActivity
             fragment = StockListFragment.newInstance();
         }
 
-        new StockListPresenter(getApplication(), fragment);
+        new StockListPresenter(getApplication(), this, fragment);
 
         showFragment(fragment);
     }
@@ -181,5 +184,12 @@ public class StockTrackerActivity extends AppCompatActivity
 
     private AppDatabase getDatabase() {
         return DatabaseCreator.getInstance(getApplication()).getDatabase();
+    }
+
+    private final LifecycleRegistry lifecycleRegistry = new LifecycleRegistry(this);
+
+    @Override
+    public LifecycleRegistry getLifecycle() {
+        return lifecycleRegistry;
     }
 }

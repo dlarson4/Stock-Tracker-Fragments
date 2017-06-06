@@ -1,13 +1,12 @@
 package com.stocktracker;
 
-import android.app.AlertDialog;
+import android.arch.lifecycle.LifecycleFragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.stocktracker.data.Quote;
 import com.stocktracker.data.Stock;
@@ -34,7 +34,7 @@ import butterknife.ButterKnife;
 import static com.stocktracker.BuildConfig.DEBUG;
 
 public class StockListFragment
-        extends Fragment
+        extends LifecycleFragment
         implements SwipeRefreshLayout.OnRefreshListener,
         ActionBarCallback.ActionBarListener,
         StockListContract.View {
@@ -157,14 +157,6 @@ public class StockListFragment
     }
 
     /**
-     * It shows the SwipeRefreshLayout progress
-     */
-    @Override
-    public void hideSwipeProgress() {
-        refreshLayout.setRefreshing(false);
-    }
-
-    /**
      * Enables swipe gesture
      */
     @Override
@@ -195,12 +187,8 @@ public class StockListFragment
     }
 
     @Override
-    public void showErrorMessage() {
-        new AlertDialog.Builder(getContext())
-                .setMessage(R.string.load_error)
-                .setTitle(R.string.app_name)
-                .setPositiveButton(android.R.string.ok, null)
-                .show();
+    public void showErrorMessage(String message) {
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -225,6 +213,11 @@ public class StockListFragment
         updateMarketValue(marketValue);
 
         updateMarketValue(marketValue, previousMarketValue);
+    }
+
+    @Override
+    public void showSwipeProgress(boolean inProgress) {
+        refreshLayout.setRefreshing(inProgress);
     }
 
     private void updateMarketValue(final BigDecimal todaysValue, final BigDecimal previousValue) {

@@ -1,6 +1,7 @@
 package com.stocktracker;
 
 import android.app.Application;
+import android.arch.lifecycle.LifecycleOwner;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -35,21 +36,35 @@ public class StockListPresenter implements StockListContract.Presenter {
     private static final String TAG = "StockListPresenter";
 
     private final Application application;
+    private final LifecycleOwner lifecycleOwner;
     private final StockListContract.View view;
 
     // list of stocks loaded from the database
     private List<Stock> stockList;
 
-    public StockListPresenter(Application application, StockListContract.View view) {
+    public StockListPresenter(
+            Application application,
+            LifecycleOwner lifecycleOwner,
+            StockListContract.View view) {
         this.application = application;
+        this.lifecycleOwner = lifecycleOwner;
         this.view = view;
         view.setPresenter(this);
+        setupStockSubscription();
+    }
+
+    private void setupStockSubscription() {
+        getDatabase().stockDao().getStocksObservable().observe(lifecycleOwner, stocks -> {
+            Log.d(TAG, "setupStockSubscription() stocks = " + stocks);
+            this.stockList = stocks;
+            if(!this.stockList.isEmpty()) {
+                getStockQuotes();
+            }
+        });
     }
 
     @Override
     public void start() {
-        if (DEBUG) Log.d(TAG, "start: ");
-        updateStockList();
     }
 
     @Override
@@ -73,34 +88,38 @@ public class StockListPresenter implements StockListContract.Presenter {
      */
     private void updateStockList() {
         if (DEBUG) Log.d(TAG, "updateStockList");
-        loadStockListFromDatabase();
-    }
-
-    private void loadStockListFromDatabase() {
-        if (DEBUG) Log.d(TAG, "loadStockListFromDatabase");
-
-        getStocksObservable()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(stocks -> {
-                    Log.d(TAG, "loadStockListFromDatabase: stocks = " + stocks);
-                    this.stockList = stocks;
-                    if(!this.stockList.isEmpty()) {
-                        retrieveStockQuotesFromWebService();
-                    }
-                }, throwable -> {
-                    if (DEBUG) Log.e(TAG, "", throwable);
-                    view.showErrorMessage();
-                });
-    }
-
-    private void retrieveStockQuotesFromWebService() {
-        if (DEBUG) Log.d(TAG, "retrieveStockQuotesFromWebService");
-
-        view.disableSwipe();
-        view.showSwipeProgress();
         getStockQuotes();
     }
+
+//    final static class SubmitUiModel {
+//        final boolean inProgress;
+//        final boolean success;
+//        final String errorMessage;
+//        final HttpResponse httpResponse;
+//
+//        public SubmitUiModel(
+//                boolean inProgress,
+//                boolean success,
+//                String errorMessage,
+//                HttpResponse httpResponse) {
+//            this.inProgress = inProgress;
+//            this.success = success;
+//            this.errorMessage = errorMessage;
+//            this.httpResponse = httpResponse;
+//        }
+//
+//        static SubmitUiModel inProgress() {
+//            return new SubmitUiModel(true, false, null, null);
+//        }
+//
+//        static SubmitUiModel success(HttpResponse httpResponse) {
+//            return new SubmitUiModel(false, true, null, httpResponse);
+//        }
+//
+//        static SubmitUiModel failure(String errorMessage) {
+//            return new SubmitUiModel(false, false, errorMessage, null);
+//        }
+//    }
 
     private void getStockQuotes() {
         if (DEBUG) Log.d(TAG, "getStockQuotes: ");
@@ -111,18 +130,52 @@ public class StockListPresenter implements StockListContract.Presenter {
                 .map(stock -> stock.getSymbol())
                 .forEach(stockSymbols::add);
 
+        view.disableSwipe();
+        view.showSwipeProgress();
+
+//        Observable.just(stockSymbols)
+//                .flatMap( symbols -> get(symbols)
+//                        .map(httpResponse -> SubmitUiModel.success(httpResponse))
+//                        .onErrorReturn(t -> SubmitUiModel.failure(t.getMessage()))
+//                        .observeOn(AndroidSchedulers.mainThread())
+//                        .subscribeOn(Schedulers.io())
+//                        .startWith(SubmitUiModel.inProgress()))
+//                .subscribe(model -> {
+//                    view.setSwipeEnabled(!model.inProgress);
+//                    view.showSwipeProgress(model.inProgress);
+//                    if(!model.inProgress) {
+//                        if(model.success) {
+//                            responseReceived(model.httpResponse);
+//                        } else {
+//                            view.showErrorMessage(application.getString(R.string.no_server_response));
+//                        }
+//                    }
+//                }, throwable -> {
+//                    Log.e(TAG, "getStockQuotes:error ", throwable);
+//                    view.showErrorMessage(throwable.getMessage());
+//                });
+
         getStockQuoteObservable(stockSymbols)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .doOnNext(httpResponse -> view.showSwipeProgress(true))
                 .flatMap(response -> {
+                    Log.d(TAG, "getStockQuotes() response = " + response);
+
                     if(response == HttpResponse.INVALID_URL || response == HttpResponse.SERVER_UNAVAILABLE) {
-                        return Observable.error(new RuntimeException(response.getStatus().name()));
+                        return Observable.error(new RuntimeException(application.getString(R.string.unable_to_contact_server)));
                     }
                     QuoteResponse quoteResponse = parseResponse(response);
                     if(quoteResponse == null) {
                         return Observable.just(new QuoteResponse.Builder().build());
                     }
                     return Observable.just(quoteResponse);
+                }).doFinally(() -> {
+                    Log.d(TAG, "doFinally() called");
+                    if (view != null) {
+                        view.showSwipeProgress(false);
+                        view.enableSwipe();
+                    }
                 })
                 .subscribe(quoteResponse -> {
                     if (DEBUG) Log.d(TAG, "accept() quoteResponse = [" + quoteResponse + "]");
@@ -130,9 +183,23 @@ public class StockListPresenter implements StockListContract.Presenter {
                     updateStockListDone(quoteResponse);
                 }, throwable -> {
                     if (DEBUG) Log.e(TAG, "accept: ", throwable);
-                    view.showErrorMessage();
+                    view.showErrorMessage(throwable.getMessage());
                 });
     }
+
+//    private Observable<HttpResponse> get(List<String> symbols) {
+//            Map<String, String> stocksQuoteParams = UrlBuilder.getStockQuoteParams(symbols);
+//            HttpRequest httpRequest = new HttpRequest(UrlBuilder.YQL_URL, stocksQuoteParams);
+//            return Observable.just(httpRequest.doGet());
+//    }
+//
+//    private void responseReceived(HttpResponse response) {
+//        if(response == HttpResponse.INVALID_URL || response == HttpResponse.SERVER_UNAVAILABLE) {
+//            view.showErrorMessage(application.getString(R.string.unable_to_contact_server));
+//        } else {
+//            updateStockListDone(parseResponse(response));
+//        }
+//    }
 
     /**
      * Called by the handler after refreshed stock list data is retrieved
@@ -141,18 +208,13 @@ public class StockListPresenter implements StockListContract.Presenter {
      */
     private void updateStockListDone(QuoteResponse quoteResponse) {
         if (quoteResponse == null) {
-            view.showErrorMessage();
+            view.showErrorMessage("No response from server.");
         } else {
             updateQuoteResponseObjects(quoteResponse);
             if (view != null) {
                 List<Quote> quoteList = quoteResponse.getQuotes();
                 view.updateStockListDisplay(quoteList);
             }
-        }
-
-        if (view != null) {
-            view.hideSwipeProgress();
-            view.enableSwipe();
         }
     }
 
@@ -193,10 +255,6 @@ public class StockListPresenter implements StockListContract.Presenter {
             HttpRequest httpRequest = new HttpRequest(UrlBuilder.YQL_URL, stocksQuoteParams);
             return httpRequest.doGet();
         });
-    }
-
-    private Observable<List<Stock>> getStocksObservable() {
-        return Observable.fromCallable(() -> getDatabase().stockDao().getAll());
     }
 
     private QuoteResponse parseResponse(HttpResponse response) {

@@ -13,14 +13,13 @@ import java.util.List;
 
 public class StockListContract {
     public interface View {
-        void hideSwipeProgress();
         void enableSwipe();
         void setPresenter(StockListContract.Presenter stockListPresenter);
         void showSwipeProgress();
         void disableSwipe();
-        LoaderManager getLoaderManager();
-        void showErrorMessage();
+        void showErrorMessage(String message);
         void updateStockListDisplay(List<Quote> quoteList);
+        void showSwipeProgress(boolean inProgress);
     }
 
     public interface Presenter {
