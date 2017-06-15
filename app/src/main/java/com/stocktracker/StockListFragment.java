@@ -1,6 +1,7 @@
 package com.stocktracker;
 
 import android.arch.lifecycle.LifecycleFragment;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -20,12 +21,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.stocktracker.data.Quote;
 import com.stocktracker.data.Stock;
+import com.stocktracker.data.StockQuote;
+import com.stocktracker.http.HttpResponse;
+import com.stocktracker.util.CurrencyUtils;
 import com.stocktracker.util.FormatUtils;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -36,8 +38,7 @@ import static com.stocktracker.BuildConfig.DEBUG;
 public class StockListFragment
         extends LifecycleFragment
         implements SwipeRefreshLayout.OnRefreshListener,
-        ActionBarCallback.ActionBarListener,
-        StockListContract.View {
+        ActionBarCallback.ActionBarListener {
 
     private static final String TAG = StockListFragment.class.getSimpleName();
 
@@ -61,9 +62,12 @@ public class StockListFragment
     // callback to Activity
     private StockListListener stockListListener;
 
-    private StockListContract.Presenter presenter;
-
     private CoordinatorLayout mainView;
+
+    private StockQuoteViewModel stockQuoteViewModel;
+    private List<Stock> stocks;
+
+    private StockQuoteAdapter stockQuoteAdapter;
 
     interface StockListListener {
         void addStock();
@@ -86,8 +90,8 @@ public class StockListFragment
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL_LIST));
 
-        final RecyclerView.Adapter mStockAdapter = new StockAdapter(getContext(), new ArrayList<>());
-        recyclerView.setAdapter(mStockAdapter);
+        stockQuoteAdapter = new StockQuoteAdapter(getContext());
+        recyclerView.setAdapter(stockQuoteAdapter);
 
         refreshLayout.setOnRefreshListener(this);
         recyclerView.setLongClickable(true);
@@ -96,14 +100,34 @@ public class StockListFragment
 
         fab.setOnClickListener(view -> stockListListener.addStock());
 
+        stockQuoteViewModel = ViewModelProviders.of(this).get(StockQuoteViewModel.class);
+        stockQuoteViewModel.getStockQuotes().observe(this, quotes -> {
+            if (DEBUG) Log.d(TAG, "stockQuoteViewModel.observe() [" + quotes + "]");
+            updateStockQuoteList(quotes);
+        });
+
+        stockQuoteViewModel.getUpdateResult().observe(this, quoteUpdateResult -> {
+            if(!quoteUpdateResult.isSuccess()) {
+                handleError(quoteUpdateResult.getStatus());
+            }
+        });
+
+        StockLiveData stockLiveData = new StockLiveData(getActivity().getApplication(), this);
+        stockLiveData.observe(this, stocks -> {
+            this.stocks = stocks;
+            showSwipeProgress(true);
+            disableSwipe();
+            stockQuoteViewModel.setStocks(stocks);
+        });
+
         return mainView;
     }
 
-    @Override
-    public void onResume() {
-        if (DEBUG) Log.d(TAG, "onResume: ");
-        super.onResume();
-        presenter.start();
+    private void handleError(HttpResponse.Status status) {
+        if (DEBUG) Log.d(TAG, "handleError() status = [" + status + "]");
+        if(status == HttpResponse.Status.ServerUnavailable) {
+            showErrorMessage(getString(R.string.unable_to_contact_server));
+        }
     }
 
     private final RecyclerItemClickListener.OnItemClickListener itemClickListener
@@ -145,35 +169,19 @@ public class StockListFragment
     @Override
     public void onRefresh() {
         if (DEBUG) Log.d(TAG, "onRefresh");
-        presenter.onSwipeRefresh();
+        stockQuoteViewModel.setStocks(this.stocks);
     }
-
-    /**
-     * It shows the SwipeRefreshLayout progress
-     */
-    @Override
-    public void showSwipeProgress() {
-        refreshLayout.setRefreshing(true);
-    }
-
     /**
      * Enables swipe gesture
      */
-    @Override
-    public void enableSwipe() {
+    private void enableSwipe() {
         refreshLayout.setEnabled(true);
-    }
-
-    @Override
-    public void setPresenter(StockListContract.Presenter stockListPresenter) {
-        this.presenter = stockListPresenter;
     }
 
     /**
      * Disables swipe gesture. It prevents manual gestures but keeps the option tu show refreshing programmatically.
      */
-    @Override
-    public void disableSwipe() {
+    private void disableSwipe() {
         refreshLayout.setEnabled(false);
     }
 
@@ -183,29 +191,24 @@ public class StockListFragment
      */
     void updateStockList() {
         if (DEBUG) Log.d(TAG, "updateStockList");
-        presenter.onSwipeRefresh(); // TODO temporary hack until more refactoring is done
+        stockQuoteViewModel.setStocks(this.stocks);
     }
 
-    @Override
-    public void showErrorMessage(String message) {
+    private void showErrorMessage(String message) {
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
-    /**
-     * Update the ListView with the provided list of Quote objects
-     */
-    @Override
-    public void updateStockListDisplay(final List<Quote> quoteList) {
+    private void updateStockQuoteList(final List<StockQuote> quoteList) {
         if(quoteList == null) {
             Log.e(TAG, "updateStockListDisplay: quoteList is null");
             return;
         }
 
-        final RecyclerView.Adapter stockAdapter = new StockAdapter(getContext(), quoteList);
-        recyclerView.setAdapter(stockAdapter);
+        stockQuoteAdapter.update(quoteList);
+        stockQuoteAdapter.notifyDataSetChanged();
 
-        final BigDecimal marketValue = FormatUtils.getTotalMarketValue(quoteList);
-        final BigDecimal previousMarketValue = FormatUtils.getPreviousMarketValue(quoteList);
+        final BigDecimal marketValue = CurrencyUtils.getTotalMarketValue(quoteList);
+        final BigDecimal previousMarketValue = CurrencyUtils.getPreviousMarketValue(quoteList);
 
         if (DEBUG) Log.d(TAG, "Market Total BigDecimal = " + marketValue);
         if (DEBUG) Log.d(TAG, "Previous Market Total BigDecimal = " + previousMarketValue);
@@ -213,10 +216,12 @@ public class StockListFragment
         updateMarketValue(marketValue);
 
         updateMarketValue(marketValue, previousMarketValue);
+
+        showSwipeProgress(false);
+        enableSwipe();
     }
 
-    @Override
-    public void showSwipeProgress(boolean inProgress) {
+    private void showSwipeProgress(boolean inProgress) {
         refreshLayout.setRefreshing(inProgress);
     }
 
@@ -242,7 +247,7 @@ public class StockListFragment
 
             if (previousValue != null && previousValue.intValue() != 0) {
                 BigDecimal todaysChangePercent = todaysChange.divide(previousValue, 3);
-                String todaysChangePercentFormatted = FormatUtils.formatPercent(Math.abs(todaysChangePercent.doubleValue()));
+                String todaysChangePercentFormatted = CurrencyUtils.formatPercent(Math.abs(todaysChangePercent.doubleValue()));
 
                 totalMarketChangePercentView.setText(changeSymbol + todaysChangePercentFormatted);
                 totalMarketChangePercentView.setTextColor(changeColor);
@@ -270,7 +275,10 @@ public class StockListFragment
     // Action Bar callback
     @Override
     public void onDestroyActionMode(ActionMode mode) {
-        recyclerView.getChildAt(selectedIndex).setSelected(false);
+        View view = recyclerView.getChildAt(selectedIndex);
+        if(view != null) {
+            view.setSelected(false);
+        }
         actionMode = null;
     }
 
@@ -281,7 +289,8 @@ public class StockListFragment
             return;
         }
 
-        Stock stock = presenter.getStock(selectedIndex);
+//        Stock stock = presenter.getStock(selectedIndex);
+        Stock stock = this.stocks.get(selectedIndex);
         if (DEBUG) Log.d(TAG, "Selected stock = " + stock);
 
         recyclerView.clearFocus(); // to remove the highlighted background

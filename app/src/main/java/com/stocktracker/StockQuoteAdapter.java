@@ -9,7 +9,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.stocktracker.data.Quote;
+import com.stocktracker.data.StockQuote;
+import com.stocktracker.util.CurrencyUtils;
 import com.stocktracker.util.FormatUtils;
 import com.stocktracker.util.Utils;
 
@@ -21,21 +22,24 @@ import static com.stocktracker.BuildConfig.DEBUG;
 /**
  * Created by dlarson on 10/27/15.
  */
-public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> {
-    private static final String TAG = StockAdapter.class.getSimpleName();
+public class StockQuoteAdapter extends RecyclerView.Adapter<StockQuoteAdapter.ViewHolder> {
+    private static final String TAG = StockQuoteAdapter.class.getSimpleName();
 
-    private List<Quote> quotes;
+    private List<StockQuote> stockQuotes;
 
     private final LayoutInflater layoutInflater;
     private final WeakReference<Context> context;
 
-    public StockAdapter(Context context, List<Quote> quotes) {
+    public StockQuoteAdapter(Context context) {
         this.context = new WeakReference<>(context);
-        this.quotes = quotes;
         layoutInflater = LayoutInflater.from(context);
 
         TypedValue typedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.selectableItemBackground, typedValue, true);
+    }
+
+    public void update(List<StockQuote> stockQuotes) {
+        this.stockQuotes = stockQuotes;
     }
 
     @Override
@@ -47,47 +51,53 @@ public class StockAdapter extends RecyclerView.Adapter<StockAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        final Quote quote = quotes.get(position);
+        StockQuote stockQuote = stockQuotes.get(position);
 
-        holder.getStockSymbol().setText(quote.getSymbol());
+        holder.getStockSymbol().setText(stockQuote.symbol());
 
-        int changeColor = getChangeColor(quote);
-        final FormatUtils.ChangeType changeType = FormatUtils.getChangeType(quote.getChange());
+        String change = stockQuote.change();
+
+        int changeColor = getChangeColor(stockQuote);
+        final FormatUtils.ChangeType changeType = FormatUtils.getChangeType(change);
         final String changeSymbol = FormatUtils.getChangeSymbol(layoutInflater.getContext(), changeType);
 
-        holder.getStockSymbol().setText(quote.getSymbol());
-        holder.getStockName().setText(quote.getName());
+        holder.getStockSymbol().setText(stockQuote.symbol());
+        holder.getStockName().setText(stockQuote.name());
 
-        String lastTradePriceFormatted = FormatUtils.formatCurrency(quote.getLastTradePriceOnly());
+        String lastTradePriceFormatted = CurrencyUtils.formatCurrency(stockQuote.lastTradePriceOnly());
         holder.getStockPrice().setText(lastTradePriceFormatted);
 
-        boolean isChangeValid = Utils.isValidChangeValue(quote.getChange());
+        boolean isChangeValid = Utils.isValidChangeValue(change);
         if(isChangeValid) {
-            String changeFormatted = FormatUtils.formatCurrency(quote.getChange());
+            String changeFormatted = CurrencyUtils.formatCurrency(change);
             holder.getStockChange().setText(changeFormatted);
 
-            double changePercent = FormatUtils.getPercentageChange(quote.getLastTradePriceOnly(), quote.getChange());
-            String changePercentFormatted = FormatUtils.formatPercent(changePercent);
+            double changePercent = CurrencyUtils.getPercentageChange(
+                    stockQuote.lastTradePriceOnly(),
+                    change);
+            String changePercentFormatted = CurrencyUtils.formatPercent(changePercent);
             holder.getStockChangePercentage().setText(changeSymbol + changePercentFormatted);
 
             holder.getStockChange().setTextColor(changeColor);
             holder.getStockChangePercentage().setTextColor(changeColor);
 
         } else {
-            if (DEBUG) Log.e(TAG, "onBindViewHolder: invalid change value '" + quote.getChange() + "'");
+            if (DEBUG) Log.e(TAG, "onBindViewHolder: invalid change value '" + change + "'");
             holder.getStockChange().setText("-");
             holder.getStockChange().setTextColor(changeColor);
         }
+
+
     }
 
     @Override
     public int getItemCount() {
-        return quotes.size();
+        return stockQuotes == null ? 0 : stockQuotes.size();
     }
 
-    private int getChangeColor(Quote quote) {
+    private int getChangeColor(StockQuote quote) {
 
-        final FormatUtils.ChangeType changeType = FormatUtils.getChangeType(quote.getChange());
+        final FormatUtils.ChangeType changeType = FormatUtils.getChangeType(quote.change());
 
         int colorId;
         if (changeType == FormatUtils.ChangeType.Negative) {

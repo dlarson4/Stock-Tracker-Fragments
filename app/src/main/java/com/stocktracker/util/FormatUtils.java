@@ -19,54 +19,7 @@ public class FormatUtils {
     private static final String TAG = FormatUtils.class.getSimpleName();
 
     private FormatUtils() {
-    }
-
-    public static String formatCurrency(String value) {
-        if (value == null || !Utils.isValidChangeValue(value)) {
-            return "";
-        }
-
-        return formatCurrency(new BigDecimal(value));
-    }
-
-    public static String formatCurrency(BigDecimal bd) {
-        try {
-//            bd.setScale(3, RoundingMode.HALF_UP);
-            DecimalFormat formatter = (DecimalFormat) NumberFormat.getCurrencyInstance();
-            formatter.setNegativePrefix("-");
-            formatter.setNegativeSuffix("");
-
-            return formatter.format(bd.doubleValue());
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "Error parsing " + bd, e);
-        }
-        return "";
-    }
-
-    public static String formatPercent(double d) {
-        if (DEBUG) Log.d(TAG, "formatPercent() d = [" + d + "]");
-
-        NumberFormat defaultFormat = NumberFormat.getPercentInstance();
-        defaultFormat.setMinimumFractionDigits(2);
-        String formatted = defaultFormat.format(d);
-
-        if (DEBUG) Log.d(TAG, "formatPercent() formatted: " + formatted);
-        return formatted;
-    }
-
-    public static double getPercentageChange(String valueStr, String changeStr) {
-        if (valueStr == null || changeStr == null) {
-            return 0.0;
-        }
-
-        try {
-            double change = Math.abs(Double.parseDouble(changeStr));
-            double value = Double.parseDouble(valueStr);
-            return change / (value - change);
-        } catch (NumberFormatException e) {
-            Log.e(TAG, "Error parsing '" + valueStr + "'", e);
-        }
-        return 0.0;
+        throw new IllegalArgumentException();
     }
 
     /**
@@ -135,73 +88,6 @@ public class FormatUtils {
             }
             return Unknown;
         }
-    }
-
-    public static BigDecimal getTotalMarketValue(List<Quote> quoteList) {
-        if (quoteList == null) {
-            throw new IllegalArgumentException("quoteList cannot be null");
-        }
-
-        BigDecimal totalValue = null;
-        for (Quote quote : quoteList) {
-            BigDecimal price = new BigDecimal(quote.getLastTradePriceOnly());
-            BigDecimal quantity = new BigDecimal(quote.getQuantity());
-            BigDecimal value = price.multiply(quantity);
-
-            if (totalValue == null) {
-                totalValue = value;
-            } else {
-                totalValue = totalValue.add(value);
-            }
-        }
-        return totalValue;
-    }
-
-    /**
-     * Calculate the previous market value by adding the 'change' to the 'lastTradePriceOnly' and multiply by 'quantity' for each Quote
-     */
-    public static BigDecimal getPreviousMarketValue(List<Quote> quoteList) {
-        if (quoteList == null) {
-            throw new IllegalArgumentException("quoteList cannot be null");
-        }
-
-        BigDecimal yesterdaysTotalValue = null;
-        for (Quote quote : quoteList) {
-            if (!Utils.isValidChangeValue(quote.getChange())) {
-                Log.d(TAG, "getPreviousMarketValue: no change value for " + quote.getSymbol());
-                continue;
-            }
-            BigDecimal price = new BigDecimal(quote.getLastTradePriceOnly());
-            BigDecimal quantity = new BigDecimal(quote.getQuantity());
-            BigDecimal change = new BigDecimal(quote.getChange());
-            BigDecimal yesterdaysValue = price.add(change.negate()).multiply(quantity);
-
-            if (DEBUG) Log.d(TAG, "getPreviousMarketValue: " + quote.getSymbol()
-                    + ": price=" + price
-                    + ", quantity=" + quantity
-                    + ", change=" + change
-                    + ", yesterdaysValue=" + yesterdaysValue );
-
-            if (yesterdaysTotalValue == null) {
-                yesterdaysTotalValue = yesterdaysValue;
-            } else {
-                yesterdaysTotalValue = yesterdaysTotalValue.add(yesterdaysValue);
-            }
-        }
-        return yesterdaysTotalValue;
-    }
-
-    public static BigDecimal getMarketValueChange(final BigDecimal currentMarketValue, final BigDecimal previousMarketValue) {
-        int diff = currentMarketValue.compareTo(previousMarketValue);
-        BigDecimal todaysChange;
-        if (diff == 0) {
-            todaysChange = new BigDecimal(0);
-        } else if (diff == 1) {
-            todaysChange = currentMarketValue.subtract(previousMarketValue);
-        } else {
-            todaysChange = previousMarketValue.subtract(currentMarketValue);
-        }
-        return todaysChange;
     }
 
     public static String formatMarketValue(BigDecimal b) {

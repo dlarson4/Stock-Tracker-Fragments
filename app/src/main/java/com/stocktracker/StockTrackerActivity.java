@@ -52,8 +52,6 @@ public class StockTrackerActivity extends AppCompatActivity
             fragment = StockListFragment.newInstance();
         }
 
-        new StockListPresenter(getApplication(), this, fragment);
-
         showFragment(fragment);
     }
 
