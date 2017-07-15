@@ -1,4 +1,4 @@
-package com.stocktracker;
+package com.stocktracker.add;
 
 import android.util.Log;
 
@@ -15,9 +15,7 @@ import org.json.JSONObject;
 import java.util.Map;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.stocktracker.BuildConfig.DEBUG;
@@ -25,7 +23,6 @@ import static com.stocktracker.BuildConfig.DEBUG;
 /**
  * Created by dlarson on 4/17/17.
  */
-
 public class AddStockPresenter {
     private static final String TAG = "AddStockPresenter";
 
@@ -41,14 +38,11 @@ public class AddStockPresenter {
         getStockQuoteObservable(stockSymbol)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .flatMap(new Function<HttpResponse, ObservableSource<QuoteResponse>>() {
-                    @Override
-                    public ObservableSource<QuoteResponse> apply(HttpResponse response) throws Exception {
-                        if(response == HttpResponse.INVALID_URL || response == HttpResponse.SERVER_UNAVAILABLE) {
-                            return Observable.error(new RuntimeException(response.getStatus().name()));
-                        }
-                        return Observable.just(parseResponse(response));
+                .flatMap(response -> {
+                    if(response == HttpResponse.INVALID_URL || response == HttpResponse.SERVER_UNAVAILABLE) {
+                        return Observable.error(new RuntimeException(response.getStatus().name()));
                     }
+                    return Observable.just(parseResponse(response));
                 })
                 .subscribe(quoteResponse -> {
                     if (DEBUG) Log.d(TAG, "accept() quoteResponse = [" + quoteResponse + "]");

@@ -36,6 +36,8 @@
     <string name="unable_to_contact_server">Unable to contact stock quote server.</string>
     <string name="no_server_response">No response received from quote server.</string>
     <string name="quantity">Quantity</string>
+
     <string name="edit_quantity">Edit Quantity</string>
+    <string name="invalid_quantity">Invalid quantity (must be greater than 0)</string>
 
 </resources>

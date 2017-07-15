@@ -1,9 +1,8 @@
 package com.stocktracker.http;
 
+import com.stocktracker.data.Status;
+
 public class HttpResponse {
-    public enum Status {
-        Success, InvalidUrl, ServerUnavailable;
-    }
 
     public static HttpResponse INVALID_URL = new HttpResponse(Status.InvalidUrl);
     public static HttpResponse SERVER_UNAVAILABLE = new HttpResponse(Status.ServerUnavailable);

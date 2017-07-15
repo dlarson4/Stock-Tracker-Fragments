@@ -21,9 +21,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.stocktracker.data.Resource;
+import com.stocktracker.data.Status;
 import com.stocktracker.data.Stock;
 import com.stocktracker.data.StockQuote;
-import com.stocktracker.http.HttpResponse;
 import com.stocktracker.util.CurrencyUtils;
 import com.stocktracker.util.FormatUtils;
 
@@ -100,15 +101,15 @@ public class StockListFragment
 
         fab.setOnClickListener(view -> stockListListener.addStock());
 
-        stockQuoteViewModel = ViewModelProviders.of(this).get(StockQuoteViewModel.class);
-        stockQuoteViewModel.getStockQuotes().observe(this, quotes -> {
-            if (DEBUG) Log.d(TAG, "stockQuoteViewModel.observe() [" + quotes + "]");
-            updateStockQuoteList(quotes);
-        });
+        stockQuoteViewModel = ViewModelProviders
+                .of(this, getViewModelFactory())
+                .get(StockQuoteViewModel.class);
 
-        stockQuoteViewModel.getUpdateResult().observe(this, quoteUpdateResult -> {
-            if(!quoteUpdateResult.isSuccess()) {
-                handleError(quoteUpdateResult.getStatus());
+        stockQuoteViewModel.getResource().observe(this, resource -> {
+            if(resource.status == Status.Success) {
+                updateStockQuoteList(resource.data);
+            } else {
+                handleError(resource);
             }
         });
 
@@ -123,11 +124,15 @@ public class StockListFragment
         return mainView;
     }
 
-    private void handleError(HttpResponse.Status status) {
-        if (DEBUG) Log.d(TAG, "handleError() status = [" + status + "]");
-        if(status == HttpResponse.Status.ServerUnavailable) {
-            showErrorMessage(getString(R.string.unable_to_contact_server));
-        }
+    private StockQuoteViewModel.Factory getViewModelFactory() {
+        return new StockQuoteViewModel.Factory(getActivity().getApplication());
+    }
+
+    private void handleError(Resource resource) {
+        if (DEBUG) Log.d(TAG, "handleError() status = [" + resource + "]");
+        showErrorMessage(resource.message);
+        showSwipeProgress(false);
+        enableSwipe();
     }
 
     private final RecyclerItemClickListener.OnItemClickListener itemClickListener
@@ -289,7 +294,6 @@ public class StockListFragment
             return;
         }
 
-//        Stock stock = presenter.getStock(selectedIndex);
         Stock stock = this.stocks.get(selectedIndex);
         if (DEBUG) Log.d(TAG, "Selected stock = " + stock);
 

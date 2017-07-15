@@ -6,53 +6,67 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.google.gson.annotations.SerializedName;
 
 @Entity(tableName = "quote")
 public class Quote implements Parcelable {
 
     @PrimaryKey
     @ColumnInfo(name = "symbol")
-    private String symbol;
+    @SerializedName("symbol")
+    public String symbol;
 
     @ColumnInfo(name = "name")
-    private String name;
+    @SerializedName("Name")
+    public String name;
 
     @ColumnInfo(name = "average_daily_volume")
-    private String averageDailyVolume;
+    @SerializedName("AverageDailyVolume")
+    public String averageDailyVolume;
 
     @ColumnInfo(name = "change")
-    private String change;
+    @SerializedName("Change")
+    public String change;
 
     @ColumnInfo(name = "days_low")
-    private String daysLow;
+    @SerializedName("DaysLow")
+    public String daysLow;
 
     @ColumnInfo(name = "days_high")
-    private String daysHigh;
+    @SerializedName("DaysHigh")
+    public String daysHigh;
 
     @ColumnInfo(name = "year_low")
-    private String yearLow;
+    @SerializedName("YearLow")
+    public String yearLow;
 
     @ColumnInfo(name = "year_high")
-    private String yearHigh;
+    @SerializedName("YearHigh")
+    public String yearHigh;
 
     @ColumnInfo(name = "market_capitalization")
-    private String marketCapitalization;
+    @SerializedName("MarketCapitalization")
+    public String marketCapitalization;
 
     @ColumnInfo(name = "last_trade_price_only")
-    private String lastTradePriceOnly;
+    @SerializedName("LastTradePriceOnly")
+    public String lastTradePriceOnly;
 
     @ColumnInfo(name = "days_range")
-    private String daysRange;
+    @SerializedName("DaysRange")
+    public String daysRange;
 
     @ColumnInfo(name = "volume")
-    private String volume;
+    @SerializedName("Volume")
+    public String volume;
 
     @ColumnInfo(name = "stock_exchange")
-    private String stockExchange;
+    @SerializedName("StockExchange")
+    public String stockExchange;
 
     // populated from the database, not the web service
     @Ignore
-    private double quantity;
+    public double quantity;
 
     // SQLite id
     @Ignore

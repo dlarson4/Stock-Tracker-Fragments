@@ -1,4 +1,4 @@
-package com.stocktracker;
+package com.stocktracker.add;
 
 import com.stocktracker.data.QuoteResponse;
 

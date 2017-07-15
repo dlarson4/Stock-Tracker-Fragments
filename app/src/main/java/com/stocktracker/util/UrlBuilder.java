@@ -22,7 +22,6 @@ public class UrlBuilder {
     private static Map<String, String> baseParams = new HashMap<>();
 
     static {
-
         baseParams.put("format", "json");
         baseParams.put("env", "store://datatables.org/alltableswithkeys");
     }

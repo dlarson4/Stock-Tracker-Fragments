@@ -12,10 +12,14 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.stocktracker.add.AddStockDialogFragment;
+import com.stocktracker.data.Quote;
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.data.Stock;
 import com.stocktracker.db.AppDatabase;
 import com.stocktracker.db.DatabaseCreator;
+import com.stocktracker.edit.EditQuantityDialogFragment;
+import com.stocktracker.exception.QuoteNotFoundException;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -113,9 +117,9 @@ public class StockTrackerActivity extends AppCompatActivity
      * @return The StockListFragment or null if not found
      */
     private StockListFragment getStockListFragment() {
-        Fragment f = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-        if (f instanceof StockListFragment) {
-            return (StockListFragment) f;
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+        if (fragment instanceof StockListFragment) {
+            return (StockListFragment) fragment;
         }
         return null;
     }
@@ -129,8 +133,42 @@ public class StockTrackerActivity extends AppCompatActivity
 
     @Override
     public void editStock(Stock stock) {
-        EditQuantityDialogFragment editQuantityDialogFragment = EditQuantityDialogFragment.newInstance(stock);
-        editQuantityDialogFragment.show(getFragmentManager(), EditQuantityDialogFragment.TAG);
+        Observable
+                .fromCallable(() -> {
+                    Quote quote = getDatabase().quoteDao().findByTicker(stock.getSymbol());
+                    if (quote == null) {
+                        throw new QuoteNotFoundException("symbol " + stock.getSymbol() + "not found");
+                    }
+                    return new StockWithName(stock, quote.getName());
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        stockWithName -> displayEditQuantityDialog(stockWithName.stock, stockWithName.name),
+                        throwable -> { displayUnableToLocateStock(stock.getSymbol());
+                });
+    }
+
+    private void displayUnableToLocateStock(String tickerSymbol) {
+        Toast.makeText(
+                this,
+                "Unable to locate stock " + tickerSymbol + " to edit.",
+                Toast.LENGTH_LONG).show();
+    }
+
+    private static class StockWithName {
+        final Stock stock;
+        final String name;
+
+        private StockWithName(Stock stock, String name) {
+            this.stock = stock;
+            this.name = name;
+        }
+    }
+
+    private void displayEditQuantityDialog(Stock stock, String name) {
+        EditQuantityDialogFragment fragment = EditQuantityDialogFragment.newInstance(stock, name);
+        fragment.show(getFragmentManager(), EditQuantityDialogFragment.TAG);
     }
 
     @Override

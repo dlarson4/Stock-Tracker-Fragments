@@ -1,4 +1,4 @@
-package com.stocktracker;
+package com.stocktracker.add;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.stocktracker.R;
 import com.stocktracker.data.QuoteResponse;
 import com.stocktracker.data.Stock;
 import com.stocktracker.db.AppDatabase;
